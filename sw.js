@@ -1,6 +1,7 @@
-// Service worker: guarda la app para que abra sin conexión
-const CACHE = 'cuentas-claras-v2';
-const FILES = ['./', './index.html', './manifest.webmanifest', './apple-touch-icon.png', './icon-192.png', './icon-512.png'];
+// Service worker: guarda la app para que abra sin conexión y muestra
+// las notificaciones push que manda el servidor.
+const CACHE = 'cuentas-claras-v4';
+const FILES = ['./', './index.html', './config.js', './manifest.webmanifest', './apple-touch-icon.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
@@ -18,4 +19,21 @@ self.addEventListener('fetch', e => {
       return res;
     }).catch(() => caches.match(e.request).then(r => r || caches.match('./index.html')))
   );
+});
+
+self.addEventListener('push', e => {
+  let data = {title: 'Cuentas Claras', body: 'Tienes un aviso nuevo.'};
+  try { data = e.data.json(); } catch(_){}
+  e.waitUntil(self.registration.showNotification(data.title, {
+    body: data.body,
+    icon: './icon-192.png',
+    badge: './icon-192.png',
+  }));
+});
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({type:'window'}).then(list => {
+    if (list.length) return list[0].focus();
+    return self.clients.openWindow('./');
+  }));
 });

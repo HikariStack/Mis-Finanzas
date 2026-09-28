@@ -11,6 +11,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
+<script src="config.js"></script>
 <title>Cuentas Claras</title>
 <style>
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -22,6 +23,7 @@ img{max-width:100%}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <style>
 :root{
   --bg:#EEF2F0; --surface:#FFFFFF; --surface-2:#E3E9E6; --ink:#13201C; --muted:#5A6964; --line:#D5DDD9;
@@ -182,6 +184,44 @@ svg text{fill:var(--muted);font-family:var(--body);font-size:10.5px}
 .swatches button[aria-pressed="true"]{border-color:var(--ink)}
 textarea.field{min-height:110px;font-size:13px;font-family:ui-monospace,Menlo,monospace}
 .toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:70;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;box-shadow:var(--shadow)}
+
+.row .s.wrap{white-space:normal}
+.side{display:flex;flex-direction:column;align-items:flex-end;text-align:right;flex:none}
+.side .s{font-size:12px;color:var(--muted)}
+.series-note{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--accent-soft);border-radius:14px;padding:10px 12px;margin-bottom:12px;font-size:13.5px}
+.countrow{display:flex;align-items:center;gap:10px;margin-top:8px}
+.countrow .field{width:96px}
+.countrow span{color:var(--muted);font-size:14px}
+.preview{background:var(--surface);border-radius:14px;padding:11px 13px;margin:14px 0 0;font-size:13.5px;line-height:1.5;color:var(--ink)}
+.steps p{margin:0 0 8px;font-size:14px;line-height:1.5}
+.steps code{background:var(--surface-2);border-radius:6px;padding:1px 5px;font-size:13px}
+.spacebar{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding-block:6px 10px}
+.seg2{grid-template-columns:1fr 1fr}
+.syncflag{font-size:12px;color:var(--warn);text-align:center;font-weight:600}
+.auth-h{font-family:var(--display);font-size:21px;text-align:center;margin:0 0 4px;letter-spacing:-.01em}
+.auth-links{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:12px}
+.invite{background:var(--accent-soft);border-radius:16px;padding:12px 14px;margin-bottom:14px;display:grid;gap:10px;font-size:13.5px}
+.invite-code{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border-radius:12px;padding:8px 8px 8px 14px}
+.invite-code span{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.08em}
+.debt{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.debt-k{font-size:13.5px;color:var(--muted);font-weight:600}
+.debt-v{font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:-.02em}
+.debt-row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px}
+.contribs{display:grid;gap:14px}
+.contrib-top{display:flex;justify-content:space-between;font-size:14px}
+.stack{display:flex;height:10px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin-top:6px;gap:2px}
+.stack i{display:block;height:100%}
+.contrib-sub{font-size:12.5px;color:var(--muted);margin-top:4px}
+.authwrap{min-height:70vh;display:flex;align-items:center;justify-content:center;padding-block:40px}
+.authcard{background:var(--surface);border-radius:20px;padding:24px 22px;width:100%;max-width:360px;box-shadow:var(--shadow)}
+.authcard .field{margin-top:14px}
+.spin{width:26px;height:26px;border-radius:50%;border:3px solid var(--surface-2);border-top-color:var(--accent);margin:0 auto 12px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.switch{position:relative;width:46px;height:28px;border-radius:99px;background:var(--surface-2);border:0;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+.switch[aria-pressed="true"]{background:var(--in)}
+.switch[aria-pressed="true"]::after{transform:translateX(18px)}
 </style>
 
 </head>
@@ -206,8 +246,20 @@ textarea.field{min-height:110px;font-size:13px;font-family:ui-monospace,Menlo,mo
 <script>
 /* =========================================================
    Cuentas Claras — gestor de finanzas personales
-   Todo se guarda en este dispositivo (localStorage).
+
+   Sin configurar: todo se guarda solo en este dispositivo (localStorage).
+   Configurando CONFIG de abajo con tu propio proyecto de Supabase: los
+   datos se guardan en tu servidor, con inicio de sesión, y se pueden
+   activar notificaciones push. Instrucciones completas en server/README.md.
    ========================================================= */
+
+// La configuración real va en config.js (así no se pierde al actualizar la app)
+const CONFIG = Object.assign({
+  SUPABASE_URL: '',       // p.ej. 'https://abcdefgh.supabase.co'
+  SUPABASE_ANON_KEY: '',  // la "anon public key" de tu proyecto
+  VAPID_PUBLIC_KEY: '',   // la clave pública para notificaciones push
+}, window.CUENTAS_CONFIG || {});
+const CLOUD = !!(CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY);
 
 const STORAGE_KEY = 'cuentas-claras-v1';
 const PALETTE = ['#2a78d6','#eb6834','#1baf7a','#eda100','#e87ba4','#008300','#4a3aa7','#e34948'];
@@ -267,11 +319,7 @@ function sampleData(){
     const base = new Date(now.getFullYear(), now.getMonth()-k, 1);
     const ym = `${base.getFullYear()}-${pad(base.getMonth()+1)}`;
     const d = n => `${ym}-${pad(n)}`;
-    add({type:'ingreso', amount:between(560,640), accountId:'a1', categoryId:'i1', date:d(1), note:'Nómina fin de semana'});
     add({type:'transferencia', amount:60, accountId:'a1', toAccountId:'a2', date:d(2), note:'Cajero'});
-    add({type:'transferencia', amount:80, accountId:'a1', toAccountId:'a3', date:d(2), note:'Ahorro del mes'});
-    add({type:'gasto', amount:20, accountId:'a1', categoryId:'c3', date:d(3), note:'Abono transporte'});
-    add({type:'gasto', amount:14.99, accountId:'a1', categoryId:'c6', date:d(5), note:'Tarifa móvil'});
     [6,12,19,25].forEach(day => add({type:'gasto', amount:between(24,52), accountId:'a1', categoryId:'c1', date:d(day), note:'Compra semanal'}));
     [8,15,22].forEach(day => add({type:'gasto', amount:between(7,19), accountId:'a2', categoryId:'c2', date:d(day), note:['Menú del día','Cañas','Bocata'][Math.floor(rnd()*3)]}));
     [10,24].forEach(day => add({type:'gasto', amount:between(9,32), accountId: rnd()>.5?'a1':'a2', categoryId:'c4', date:d(day), note:['Cine','Concierto','Escalada'][Math.floor(rnd()*3)]}));
@@ -280,8 +328,24 @@ function sampleData(){
     if (rnd() > .7) add({type:'ingreso', amount:50, accountId:'a2', categoryId:'i3', date:d(20), note:'Cumpleaños'});
     if (k === 1) add({type:'ingreso', amount:300, accountId:'a1', categoryId:'i2', date:d(16), note:'Beca de transporte'});
   }
-  return {version:1, demo:true, accounts, categories, tx};
+  const first = n => { const b = new Date(now.getFullYear(), now.getMonth()-5, n, 12); return isoOf(b); };
+  const monthsAgo = (k, n) => isoOf(new Date(now.getFullYear(), now.getMonth()-k, n, 12));
+  const inDays = n => isoOf(new Date(now.getFullYear(), now.getMonth(), now.getDate()+n, 12));
+  const recurring = [
+    {id:'r1', type:'ingreso', amount:600, accountId:'a1', categoryId:'i1', note:'Nómina fin de semana', freq:'monthly', start:first(1), endDate:null, count:null, last:null},
+    {id:'r2', type:'transferencia', amount:80, accountId:'a1', toAccountId:'a3', note:'Ahorro del mes', freq:'monthly', start:first(2), endDate:null, count:null, last:null},
+    {id:'r3', type:'gasto', amount:20, accountId:'a1', categoryId:'c3', note:'Abono transporte', freq:'monthly', start:first(3), endDate:null, count:null, last:null},
+    {id:'r4', type:'gasto', amount:14.99, accountId:'a1', categoryId:'c6', note:'Tarifa móvil', freq:'monthly', start:first(5), endDate:null, count:null, last:null},
+    {id:'r5', type:'gasto', amount:10.99, accountId:'a1', categoryId:'c4', note:'Suscripción de música', freq:'monthly', start:monthsAgo(3, 28), endDate:null, count:null, last:null},
+    {id:'r6', type:'gasto', amount:45, accountId:'a1', categoryId:'c5', note:'Portátil a plazos', freq:'monthly', start:monthsAgo(4, 15), endDate:null, count:12, last:null},
+    {id:'r7', type:'gasto', amount:120, accountId:'a1', categoryId:'c5', note:'Tasa de matrícula', freq:'once', start:inDays(12), endDate:null, count:null, last:null},
+  ];
+  const data = {version:2, demo:true, accounts, categories, tx, recurring};
+  runRecurring(data);
+  return data;
 }
+// Datos guardados con versiones anteriores de la app no tienen "recurring"
+function normalize(d){ if (!Array.isArray(d.recurring)) d.recurring = []; return d; }
 
 /* ---------- Estado y guardado ---------- */
 let storageOK = true;
@@ -292,13 +356,283 @@ function load(){
   } catch(e){ storageOK = false; }
   return sampleData();
 }
-function save(){
+function saveLocal(){
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); storageOK = true; }
   catch(e){ storageOK = false; }
 }
 
-let state = load();
+/* ---------- Nube (Supabase) — opcional ----------
+   Hay dos "espacios", cada uno con el mismo formato de datos:
+     personal → tabla finance_data (solo tú)
+     house    → tabla households (todos los miembros de la casa)
+   Cada vez que cambias algo se sube el espacio entero. Si otra persona (o
+   tu otro dispositivo) guardó antes, se descargan sus cambios, se juntan
+   con los tuyos elemento a elemento (gana el cambio más reciente) y se
+   vuelve a intentar. Así no se pisan los cambios de los dos. */
+let cloud = null, cloudUser = null, cloudStatus = 'off';   // off | loading | ready | error
+let authMode = 'login';                                    // login | signup | forgot | recovery | sent
+let meId = null, myName = '';
+let houseInfo = null;                                      // {id, name, code, members:[{id,name}]}
+let houseChannel = null, syncState = 'ok';                 // ok | offline
+const spaces = { personal: null, house: null };
+const COLLS = ['accounts', 'categories', 'tx', 'recurring'];
+
+function makeSpace(kind, id){ return {kind, id, data:null, base:{}, version:0, saving:false, dirty:false, timer:null}; }
+const tableOf = sp => sp.kind === 'personal' ? {table:'finance_data', key:'user_id'} : {table:'households', key:'id'};
+const activeSpace = () => spaces[ui.space] || spaces.personal;
+const isHouse = () => CLOUD && ui.space === 'house' && !!spaces.house;
+
+// Foto de cómo estaban los datos la última vez que se sincronizaron
+function omitU(it){ const {u, ...rest} = it; return rest; }
+function snapshotOf(d){
+  const m = {};
+  for (const c of COLLS) for (const it of d[c] || []) m[c + ':' + it.id] = JSON.stringify(omitU(it));
+  m.__settings = JSON.stringify(d.settings || {});
+  return m;
+}
+// Marca con la hora actual (u) todo lo que ha cambiado desde la foto
+function stamp(d, base){
+  const now = Date.now(); d.deleted = d.deleted || {};
+  const seen = new Set();
+  for (const c of COLLS) for (const it of d[c] || []){
+    const k = c + ':' + it.id; seen.add(k);
+    if (base[k] !== JSON.stringify(omitU(it))) it.u = now;
+  }
+  for (const k in base) if (k !== '__settings' && !seen.has(k)) d.deleted[k] = Math.max(d.deleted[k] || 0, now);
+  if (base.__settings !== undefined && base.__settings !== JSON.stringify(d.settings || {})) d.settingsU = now;
+}
+// Junta dos versiones: por cada elemento gana la que se cambió más tarde
+function mergeData(a, b){
+  const out = {...b, ...a};
+  const del = {...(b.deleted || {})};
+  for (const [k, v] of Object.entries(a.deleted || {})) del[k] = Math.max(del[k] || 0, v);
+  for (const c of COLLS){
+    const map = new Map();
+    for (const it of b[c] || []) map.set(it.id, it);
+    for (const it of a[c] || []){ const o = map.get(it.id); if (!o || (it.u || 0) >= (o.u || 0)) map.set(it.id, it); }
+    // se queda fuera si se borró después de su último cambio
+    out[c] = [...map.values()].filter(it => { const d = del[c + ':' + it.id]; return !d || d < (it.u || 0); });
+  }
+  out.deleted = del;
+  if ((b.settingsU || 0) > (a.settingsU || 0)){ out.settings = b.settings; out.settingsU = b.settingsU; }
+  return out;
+}
+function sameData(a, b){
+  const sa = snapshotOf(a), sb = snapshotOf(b);
+  const ka = Object.keys(sa), kb = Object.keys(sb);
+  if (ka.length !== kb.length || ka.some(k => sa[k] !== sb[k])) return false;
+  return JSON.stringify(Object.entries(a.deleted || {}).sort()) === JSON.stringify(Object.entries(b.deleted || {}).sort());
+}
+
+function applyRemote(sp, remote){
+  if (!remote) return;
+  const rdata = normalize(remote.data && remote.data.accounts ? remote.data : {accounts:[], categories:[], tx:[], recurring:[]});
+  if (!sp.data){ sp.data = rdata; }
+  else {
+    stamp(sp.data, sp.base);                          // lo pendiente queda marcado antes de juntar
+    const merged = normalize(mergeData(sp.data, rdata));
+    if (!sameData(merged, rdata)) sp.dirty = true;    // hay cosas nuestras que el servidor aún no tiene
+    sp.data = merged;
+  }
+  sp.version = remote.version;
+  sp.base = snapshotOf(sp.data);
+  if (sp === activeSpace()) state = sp.data;
+}
+
+async function fetchSpace(sp){
+  const {table, key} = tableOf(sp);
+  const {data, error} = await cloud.from(table).select('data, version').eq(key, sp.id).maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+function queueSave(sp){
+  stamp(sp.data, sp.base);
+  sp.base = snapshotOf(sp.data);
+  sp.dirty = true;
+  writeCache();
+  clearTimeout(sp.timer);
+  sp.timer = setTimeout(() => flush(sp), 500);
+}
+
+async function flush(sp){
+  if (!sp || !sp.dirty) return;
+  if (sp.saving){ clearTimeout(sp.timer); sp.timer = setTimeout(() => flush(sp), 400); return; }
+  sp.saving = true; sp.dirty = false;
+  try {
+    const {table, key} = tableOf(sp);
+    for (let attempt = 0; attempt < 5; attempt++){
+      const {data: rows, error} = await cloud.from(table)
+        .update({data: sp.data, version: sp.version + 1, updated_at: new Date().toISOString()})
+        .eq(key, sp.id).eq('version', sp.version).select('version');
+      if (error) throw error;
+      if (rows && rows.length){ sp.version = rows[0].version; break; }
+      // Alguien guardó antes que nosotros: juntamos sus cambios y reintentamos
+      applyRemote(sp, await fetchSpace(sp));
+      sp.dirty = false;
+      render();
+    }
+    setSync('ok');
+    writeCache();
+  } catch(e){
+    sp.dirty = true; setSync('offline');
+    clearTimeout(sp.timer); sp.timer = setTimeout(() => flush(sp), 8000);
+  } finally { sp.saving = false; }
+}
+
+async function refreshSpace(sp){
+  if (!sp || sp.saving) return;
+  try {
+    const row = await fetchSpace(sp);
+    if (row && row.version !== sp.version){
+      applyRemote(sp, row);
+      if (runRecurring(sp.data)) sp.dirty = true;
+      if (sp.dirty) queueSave(sp);
+      render();
+    }
+    setSync('ok');
+  } catch(e){ setSync('offline'); }
+}
+
+function setSync(v){ if (v !== syncState){ syncState = v; const el = document.getElementById('syncflag'); if (el) el.hidden = v === 'ok'; } }
+
+// Copia en el móvil para que la app abra al instante y funcione sin conexión
+const cacheKey = () => `cuentas-claras-cache-${meId}`;
+function writeCache(){
+  if (!meId) return;
+  try {
+    localStorage.setItem(cacheKey(), JSON.stringify({
+      personal: spaces.personal && {data: spaces.personal.data, version: spaces.personal.version, base: spaces.personal.base},
+      house: spaces.house && {id: spaces.house.id, data: spaces.house.data, version: spaces.house.version, base: spaces.house.base},
+      houseInfo, space: ui.space,
+    }));
+  } catch(e){}
+}
+function readCache(){
+  try { return JSON.parse(localStorage.getItem(cacheKey()) || 'null'); } catch(e){ return null; }
+}
+
+function initCloud(){
+  cloud = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+  cloud.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY'){ cloudUser = session?.user ?? null; authMode = 'recovery'; cloudStatus = 'off'; renderAuthGate(); return; }
+    if (event === 'SIGNED_OUT'){ cloudUser = null; meId = null; cloudStatus = 'off'; authMode = 'login'; spaces.personal = spaces.house = null; houseInfo = null; renderAuthGate(); return; }
+    if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user && authMode !== 'recovery'){
+      cloudUser = session.user;
+      if (meId !== cloudUser.id) setTimeout(bootCloud, 0);
+    }
+    if (event === 'INITIAL_SESSION' && !session) renderAuthGate();
+  });
+}
+
+async function bootCloud(){
+  meId = cloudUser.id;
+  myName = cloudUser.user_metadata?.name || cloudUser.email.split('@')[0];
+  spaces.personal = makeSpace('personal', meId);
+  const cache = readCache();
+  if (cache?.personal?.data){
+    Object.assign(spaces.personal, {data: normalize(cache.personal.data), version: cache.personal.version, base: cache.personal.base || {}});
+    if (cache.house?.data){ spaces.house = makeSpace('house', cache.house.id); Object.assign(spaces.house, {data: normalize(cache.house.data), version: cache.house.version, base: cache.house.base || {}}); houseInfo = cache.houseInfo; }
+    if (cache.space === 'house' && spaces.house) ui.space = 'house';
+    state = activeSpace().data; cloudStatus = 'ready'; startApp();   // abre ya con lo guardado en el móvil
+  } else { cloudStatus = 'loading'; renderAuthGate(); }
+
+  try {
+    let row = await fetchSpace(spaces.personal);
+    if (!row){
+      const init = spaces.personal.data || emptyPersonal();
+      const {error} = await cloud.from('finance_data').insert({user_id: meId, data: init, version: 1});
+      if (error) throw error;
+      row = {data: init, version: 1};
+    }
+    applyRemote(spaces.personal, row);
+    if (spaces.personal.dirty) queueSave(spaces.personal);
+    await loadHouse();
+    setSync('ok');
+  } catch(e){
+    if (!spaces.personal.data){ cloudStatus = 'error'; renderAuthGate(); return; }
+    setSync('offline');
+  }
+  if (!spaces.house && ui.space === 'house') ui.space = 'house';   // se queda en la pantalla de "crear o unirse"
+  state = activeSpace().data;
+  cloudStatus = 'ready';
+  startApp();
+  writeCache();
+}
+
+async function loadHouse(){
+  const {data: mine, error} = await cloud.from('household_members').select('household_id').eq('user_id', meId);
+  if (error) throw error;
+  if (!mine.length){ spaces.house = null; houseInfo = null; if (houseChannel){ cloud.removeChannel(houseChannel); houseChannel = null; } return; }
+  const hid = mine[0].household_id;
+  const [{data: h, error: e1}, {data: members, error: e2}] = await Promise.all([
+    cloud.from('households').select('id, name, invite_code, data, version').eq('id', hid).single(),
+    cloud.from('household_members').select('user_id, display_name, joined_at').eq('household_id', hid).order('joined_at'),
+  ]);
+  if (e1 || e2) throw (e1 || e2);
+  houseInfo = {id: hid, name: h.name, code: h.invite_code, members: members.map(m => ({id: m.user_id, name: m.display_name}))};
+  if (!spaces.house || spaces.house.id !== hid) spaces.house = makeSpace('house', hid);
+  const sp = spaces.house;
+  if (!h.data || !h.data.accounts){            // casa recién creada: le ponemos cuentas y categorías
+    if (!sp.data){ sp.data = emptyHouse(); sp.base = {}; }
+    sp.version = h.version;
+    queueSave(sp);
+  } else applyRemote(sp, {data: h.data, version: h.version});
+  if (sp.dirty) queueSave(sp);
+  if (ui.space === 'house') state = sp.data;
+  subscribeHouse();
+}
+
+async function loadMembers(){
+  if (!houseInfo) return;
+  const {data} = await cloud.from('household_members').select('user_id, display_name, joined_at').eq('household_id', houseInfo.id).order('joined_at');
+  if (data){ houseInfo.members = data.map(m => ({id: m.user_id, name: m.display_name})); writeCache(); render(); }
+}
+
+function subscribeHouse(){
+  if (houseChannel) cloud.removeChannel(houseChannel);
+  const hid = spaces.house.id;
+  houseChannel = cloud.channel('casa-' + hid)
+    .on('postgres_changes', {event: 'UPDATE', schema: 'public', table: 'households', filter: `id=eq.${hid}`}, () => refreshSpace(spaces.house))
+    .on('postgres_changes', {event: '*', schema: 'public', table: 'household_members', filter: `household_id=eq.${hid}`}, () => loadMembers())
+    .subscribe();
+}
+
+function save(){
+  if (CLOUD && cloudUser && activeSpace()){
+    const sp = activeSpace();
+    if (sp.data !== state) sp.data = normalize(state);   // p. ej. tras restaurar una copia
+    queueSave(sp);
+  } else saveLocal();
+}
+
+async function signOut(){
+  for (const sp of [spaces.personal, spaces.house]) if (sp?.dirty) await flush(sp);
+  try { localStorage.removeItem(cacheKey()); } catch(e){}
+  await cloud.auth.signOut();
+}
+
+/* Datos iniciales */
+function emptyPersonal(){
+  return normalize({version:2, demo:false,
+    accounts:[{id:uid(), name:'Banco', type:'banco', initial:0, color:PALETTE[0]}, {id:uid(), name:'Efectivo', type:'efectivo', initial:0, color:PALETTE[2]}],
+    categories: sampleData().categories.map(c => ({...c, budget:0})), tx:[], recurring:[]});
+}
+function emptyHouse(){
+  const g = ['Alquiler o hipoteca','Supermercado','Luz, agua y gas','Internet y móvil','Comunidad y seguros','Hogar y limpieza','Ocio juntos','Otros gastos'];
+  return normalize({version:2, demo:false,
+    accounts:[{id:uid(), name:'Cuenta común', type:'banco', initial:0, color:PALETTE[6]}],
+    categories: [
+      ...g.map((name, i) => ({id:'h' + uid(), name, kind:'gasto', color:PALETTE[i % PALETTE.length], budget:0})),
+      {id:'hi' + uid(), name:'Devoluciones', kind:'ingreso', color:PALETTE[2]},
+      {id:'hi' + uid(), name:'Otros ingresos', kind:'ingreso', color:PALETTE[7]},
+    ],
+    tx:[], recurring:[], settings:{shares:{}}});
+}
+
+let state = normalize(load());
 const ui = {
+  space: 'personal',          // personal | house
   tab: 'inicio',
   month: monthOf(today()),
   filterType: 'todos',
@@ -316,6 +650,7 @@ function balanceOf(accountId){
   for (const t of state.tx){
     if (t.type === 'ingreso' && t.accountId === accountId) b += t.amount;
     else if (t.type === 'gasto' && t.accountId === accountId) b -= t.amount;
+    else if (t.type === 'aportacion' && t.accountId === accountId) b += t.amount;
     else if (t.type === 'transferencia'){
       if (t.accountId === accountId) b -= t.amount;
       if (t.toAccountId === accountId) b += t.amount;
@@ -327,7 +662,7 @@ const totalBalance = () => state.accounts.reduce((s,a) => s + balanceOf(a.id), 0
 const txOfMonth = ym => state.tx.filter(t => monthOf(t.date) === ym);
 function monthTotals(ym){
   let inc = 0, out = 0;
-  for (const t of txOfMonth(ym)){ if (t.type==='ingreso') inc += t.amount; if (t.type==='gasto') out += t.amount; }
+  for (const t of txOfMonth(ym)){ if (t.type==='ingreso' || t.type==='aportacion') inc += t.amount; if (t.type==='gasto') out += t.amount; }
   return {inc, out, net: inc - out};
 }
 function spentByCategory(ym){
@@ -335,18 +670,189 @@ function spentByCategory(ym){
   for (const t of txOfMonth(ym)) if (t.type === 'gasto') m[t.categoryId] = (m[t.categoryId]||0) + t.amount;
   return m;
 }
+// Cómo cambia el saldo total con un movimiento (para la gráfica de saldo)
+function totalDelta(t){
+  if ((t.type === 'ingreso' || t.type === 'aportacion') && t.accountId) return t.amount;
+  if (t.type === 'gasto' && t.accountId) return -t.amount;
+  return 0;
+}
+
+/* ---------- Casa: miembros, reparto, deudas y aportaciones ---------- */
+const members = () => houseInfo?.members || [];
+const memberName = id => id === meId ? 'Tú' : (members().find(m => m.id === id)?.name || 'Alguien');
+const memberColor = id => PALETTE[(members().findIndex(m => m.id === id) + 4) % PALETTE.length] || PALETTE[4];
+// Porcentaje que paga cada uno de los gastos comunes (por defecto, a partes iguales)
+function shares(){
+  const ms = members(); const cfg = state.settings?.shares || {};
+  const ok = ms.length && ms.every(m => typeof cfg[m.id] === 'number') && Math.abs(ms.reduce((s, m) => s + cfg[m.id], 0) - 100) < 0.01;
+  const out = {};
+  ms.forEach(m => out[m.id] = ok ? cfg[m.id] / 100 : 1 / ms.length);
+  return out;
+}
+function sharesOfTx(t){
+  if (t.split && t.split.startsWith('only:')) return {[t.split.slice(5)]: 1};
+  return shares();
+}
+function splitLabel(){
+  const ms = members(), sh = shares();
+  if (ms.length < 2) return 'A partes iguales';
+  const vals = ms.map(m => Math.round(sh[m.id] * 100));
+  if (vals.every(v => v === vals[0])) return ms.length === 2 ? 'A medias' : 'A partes iguales';
+  return ms.map(m => `${m.id === meId ? 'Tú' : m.name} ${Math.round(sh[m.id]*100)} %`).join(' · ');
+}
+// Saldo de cada miembro: positivo = le deben dinero, negativo = debe
+function houseBalances(){
+  const net = {}; members().forEach(m => net[m.id] = 0);
+  for (const t of state.tx){
+    if (t.type === 'gasto' && t.paidBy){
+      net[t.paidBy] = (net[t.paidBy] || 0) + t.amount;
+      const sh = sharesOfTx(t);
+      for (const id in sh) net[id] = (net[id] || 0) - t.amount * sh[id];
+    }
+    if (t.type === 'liquidacion'){ net[t.from] = (net[t.from] || 0) + t.amount; net[t.to] = (net[t.to] || 0) - t.amount; }
+  }
+  for (const id in net) net[id] = Math.round(net[id] * 100) / 100;
+  return net;
+}
+function contributionsOf(ym){
+  const out = {}; members().forEach(m => out[m.id] = 0);
+  for (const t of txOfMonth(ym)) if (t.type === 'aportacion') out[t.memberId] = (out[t.memberId] || 0) + t.amount;
+  return out;
+}
+function paidOutOfPocket(ym){
+  const out = {}; members().forEach(m => out[m.id] = 0);
+  for (const t of txOfMonth(ym)) if (t.type === 'gasto' && t.paidBy) out[t.paidBy] = (out[t.paidBy] || 0) + t.amount;
+  return out;
+}
+
 const sortTx = list => list.slice().sort((a,b) => b.date.localeCompare(a.date) || (b.created||0) - (a.created||0));
 
-/* ---------- Piezas de interfaz ---------- */
-const dotHTML = (color, text) => `<span class="dot" style="background:${color}">${esc(text)}</span>`;
+/* ---------- Pagos programados y recurrentes ----------
+   Una "regla" guarda cómo se repite un pago:
+   {id, type, amount, accountId, categoryId | toAccountId, note,
+    freq: 'once'|'weekly'|'monthly'|'quarterly'|'yearly',
+    start: fecha del primer pago, endDate: última fecha posible o null,
+    count: número total de pagos o null, last: fecha del último pago ya apuntado}
+   Cada vez que se abre la app, se apuntan como movimientos normales los pagos
+   cuya fecha ya ha llegado. */
+const FREQS = {none:'No se repite', weekly:'Cada semana', monthly:'Cada mes', quarterly:'Cada 3 meses', yearly:'Cada año'};
+const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+// (funciones "normales" para poder usarlas desde sampleData, que se ejecuta antes)
+function dateOf(iso){ return new Date(iso + 'T12:00:00'); }
+function daysInMonth(y, m){ return new Date(y, m + 1, 0).getDate(); }
+const fmtDay = (iso, withYear) => dateOf(iso).toLocaleDateString('es-ES', withYear ? {day:'numeric', month:'short', year:'numeric'} : {day:'numeric', month:'short'});
+const relDay = iso => { const n = Math.round((dateOf(iso) - dateOf(today())) / 86400000); return n === 0 ? 'Hoy' : n === 1 ? 'Mañana' : `En ${n} días`; };
 
+// Fecha del pago número i (0 = el primero). Si el día no existe en ese mes
+// (un 31 en abril, por ejemplo), se usa el último día del mes.
+function occurrence(rule, i){
+  if (rule.freq === 'once') return i === 0 ? rule.start : null;
+  const s = dateOf(rule.start);
+  if (rule.freq === 'weekly'){ const d = new Date(s); d.setDate(d.getDate() + 7*i); return isoOf(d); }
+  const step = {monthly:1, quarterly:3, yearly:12}[rule.freq];
+  const total = s.getMonth() + step*i;
+  const y = s.getFullYear() + Math.floor(total / 12), m = total % 12;
+  return isoOf(new Date(y, m, Math.min(s.getDate(), daysInMonth(y, m)), 12));
+}
+// Recorre los pagos de una regla en orden mientras fn no devuelva false
+function eachOccurrence(rule, fn){
+  for (let i = 0; i < 3000; i++){
+    const date = occurrence(rule, i);
+    if (!date) return;
+    if (rule.count && i >= rule.count) return;
+    if (rule.endDate && date > rule.endDate) return;
+    if (fn(date, i) === false) return;
+  }
+}
+// Pagos que aún no se han apuntado
+function pendingOccurrences(rule, max = 1, until = null){
+  const out = [];
+  eachOccurrence(rule, date => {
+    if (until && date > until) return false;
+    if (rule.last && date <= rule.last) return true;
+    out.push(date); return out.length < max;
+  });
+  return out;
+}
+const nextOf = rule => pendingOccurrences(rule, 1)[0] || null;
+function remainingCount(rule){
+  if (rule.freq !== 'once' && !rule.count && !rule.endDate) return Infinity;
+  return pendingOccurrences(rule, 3000).length;
+}
+function describeRule(r){
+  const s = dateOf(r.start);
+  if (r.freq === 'once') return `Una vez, el ${fmtDay(r.start, true)}`;
+  if (r.freq === 'weekly') return `Cada ${DIAS[s.getDay()]}`;
+  if (r.freq === 'monthly') return `Cada mes, el día ${s.getDate()}`;
+  if (r.freq === 'quarterly') return `Cada 3 meses, el día ${s.getDate()}`;
+  return `Cada año, el ${s.getDate()} de ${MESES[s.getMonth()]}`;
+}
+function describeEnd(r){
+  if (r.freq === 'once') return '';
+  if (r.count){ const left = remainingCount(r); return left ? `quedan ${left} de ${r.count}` : `${r.count} pagos, terminado`; }
+  if (r.endDate) return `hasta el ${fmtDay(r.endDate, true)}`;
+  return 'sin fecha de fin';
+}
+function ruleLabel(r){
+  if (r.note) return r.note;
+  if (r.type === 'transferencia') return 'Transferencia';
+  if (r.type === 'aportacion') return r.memberId === meId ? 'Tu aportación' : `Aportación de ${memberName(r.memberId)}`;
+  return cat(r.categoryId)?.name ?? 'Pago programado';
+}
+// Apunta los pagos que ya han llegado. Devuelve cuántos ha creado.
+function runRecurring(s){
+  const t = today(); let made = 0;
+  for (const r of s.recurring || []){
+    eachOccurrence(r, date => {
+      if (date > t) return false;
+      if (r.last && date <= r.last) return true;
+      // id fijo (regla + fecha): si dos móviles lo apuntan a la vez, no se duplica
+      const tx = {id:`${r.id}_${date}`, type:r.type, amount:r.amount, accountId:r.accountId ?? null, date, note:r.note || '', recurringId:r.id, created:Date.now()};
+      for (const k of ['toAccountId', 'categoryId', 'paidBy', 'split', 'memberId']) if (r[k] != null) tx[k] = r[k];
+      if (s.tx.some(x => x.id === tx.id) || s.deleted?.['tx:' + tx.id]){ r.last = date; return true; }
+      s.tx.push(tx); r.last = date; made++;
+      return true;
+    });
+  }
+  return made;
+}
+// Pagos pendientes de todas las reglas hasta dentro de "days" días
+function upcoming(days = 31){
+  const lim = isoOf(new Date(Date.now() + days*86400000));
+  const out = [];
+  for (const r of state.recurring) pendingOccurrences(r, 50, lim).forEach(date => out.push({r, date}));
+  return out.sort((a,b) => a.date.localeCompare(b.date));
+}
+// Cuánto supone al mes (aprox.) un pago que se repite
+const monthlyFactor = {weekly:52/12, monthly:1, quarterly:1/3, yearly:1/12, once:0};
+
+/* ---------- Piezas de interfaz ---------- */
+const dotHTML =(color, text) => `<span class="dot" style="background:${color}">${esc(text)}</span>`;
+
+function memberDot(id){ return `<span class="dot" style="background:${memberColor(id)}">${esc(initials(id === meId ? myName : memberName(id)))}</span>`; }
+function paidByText(id){ return id === meId ? 'Pagado por ti' : `Pagado por ${memberName(id)}`; }
+function settleText(t){
+  if (t.from === meId) return `Pagaste a ${memberName(t.to)}`;
+  if (t.to === meId) return `${memberName(t.from)} te pagó`;
+  return `${memberName(t.from)} pagó a ${memberName(t.to)}`;
+}
 function txRow(t){
   let color, label, sub, cls, sign;
   const a = acc(t.accountId);
+  if (t.type === 'aportacion'){
+    return `<button class="row" data-edit="${t.id}">${memberDot(t.memberId)}
+      <span class="main"><span class="t">${esc(t.note || (t.memberId === meId ? 'Tu aportación' : `Aportación de ${memberName(t.memberId)}`))}</span><span class="s">${t.recurringId ? '↻ ' : ''}Aportación · ${esc(a?.name ?? '—')}</span></span>
+      <span class="amt in num">+${money(t.amount)}</span></button>`;
+  }
+  if (t.type === 'liquidacion'){
+    return `<button class="row" data-edit="${t.id}"><span class="dot" style="background:var(--surface-2);color:var(--ink)">✓</span>
+      <span class="main"><span class="t">${esc(settleText(t))}</span><span class="s">Saldar cuentas${t.note ? ' · ' + esc(t.note) : ''}</span></span>
+      <span class="amt tr num">${money(t.amount)}</span></button>`;
+  }
   if (t.type === 'transferencia'){
     const to = acc(t.toAccountId);
     color = 'var(--muted)'; label = t.note || 'Transferencia';
-    sub = `${a?.name ?? '—'} → ${to?.name ?? '—'}`; cls = 'tr'; sign = '';
+    sub = `${t.recurringId ? '↻ ' : ''}${a?.name ?? '—'} → ${to?.name ?? '—'}`; cls = 'tr'; sign = '';
     return `<button class="row" data-edit="${t.id}">
       <span class="dot" style="background:var(--surface-2);color:var(--ink)">⇄</span>
       <span class="main"><span class="t">${esc(label)}</span><span class="s">${esc(sub)}</span></span>
@@ -354,12 +860,29 @@ function txRow(t){
   }
   const c = cat(t.categoryId);
   color = c?.color ?? '#888'; label = t.note || c?.name || 'Sin categoría';
-  sub = `${c?.name ?? 'Sin categoría'} · ${a?.name ?? '—'}`;
+  const who = t.paidBy ? paidByText(t.paidBy) + (t.split?.startsWith('only:') ? ` · solo ${t.split.slice(5) === meId ? 'tuyo' : 'de ' + memberName(t.split.slice(5))}` : '') : (a?.name ?? '—');
+  sub = `${t.recurringId ? '↻ ' : ''}${c?.name ?? 'Sin categoría'} · ${who}`;
   cls = t.type === 'ingreso' ? 'in' : 'out'; sign = t.type === 'ingreso' ? '+' : '−';
   return `<button class="row" data-edit="${t.id}">
     ${dotHTML(color, initials(c?.name ?? '?'))}
     <span class="main"><span class="t">${esc(label)}</span><span class="s">${esc(sub)}</span></span>
     <span class="amt ${cls} num">${sign}${money(t.amount)}</span></button>`;
+}
+
+function ruleRow(r, date, showEnd){
+  const plus = r.type === 'ingreso' || r.type === 'aportacion';
+  const signed = plus ? '+' : r.type === 'gasto' ? '−' : '';
+  const cls = plus ? 'in' : r.type === 'gasto' ? 'out' : 'tr';
+  const dot = r.type === 'transferencia'
+    ? '<span class="dot" style="background:var(--surface-2);color:var(--ink)">⇄</span>'
+    : r.type === 'aportacion' ? memberDot(r.memberId)
+    : dotHTML(cat(r.categoryId)?.color ?? '#888', initials(cat(r.categoryId)?.name ?? '?'));
+  const end = showEnd ? describeEnd(r) : '';
+  const sub = showEnd ? `${describeRule(r)}${end ? ' · ' + end : ''}` : `${fmtDay(date)} · ${describeRule(r)}`;
+  const right = showEnd ? (date ? `Próximo: ${fmtDay(date)}` : 'Terminado') : relDay(date);
+  return `<button class="row" data-rule="${r.id}">${dot}
+    <span class="main"><span class="t">${esc(ruleLabel(r))}</span><span class="s${showEnd ? ' wrap' : ''}">${esc(sub)}</span></span>
+    <span class="side"><span class="amt ${cls} num">${signed}${money(r.amount)}</span><span class="s">${esc(right)}</span></span></button>`;
 }
 
 const monthBar = () => `<div class="monthbar">
@@ -391,20 +914,21 @@ views.inicio = () => {
     .map(c => ({c, spent: spent[c.id]||0, pct:(spent[c.id]||0)/c.budget}))
     .sort((a,b) => b.pct - a.pct).slice(0,3);
   return `
-  <header class="top"><div class="brand"><span class="brand-mark">€</span>Cuentas Claras</div></header>
-  ${demoBanner()}
+  ${isHouse() ? inviteBanner() : demoBanner()}
   <div class="hero">
-    <div class="label">Saldo total</div>
+    <div class="label">${isHouse() ? 'Saldo en común' : 'Saldo total'}</div>
     <div class="big num ${total<0?'neg':''}">${money(total)}</div>
     <div class="hero-row">
-      <div><div class="k">Ingresos de ${MESES[Number(ym.slice(5))-1]}</div><div class="v num">+${money(mt.inc)}</div></div>
+      <div><div class="k">${isHouse() ? 'Entradas' : 'Ingresos'} de ${MESES[Number(ym.slice(5))-1]}</div><div class="v num">+${money(mt.inc)}</div></div>
       <div><div class="k">Gastos de ${MESES[Number(ym.slice(5))-1]}</div><div class="v num">−${money(mt.out)}</div></div>
       <div><div class="k">Balance del mes</div><div class="v num">${mt.net>=0?'+':'−'}${money(Math.abs(mt.net))}</div></div>
     </div>
   </div>
 
+  ${isHouse() ? houseBlocks(ym) : ''}
+
   <section class="block">
-    <div class="block-h"><h2>Cuentas</h2><button class="link" data-action="new-account">+ Nueva cuenta</button></div>
+    <div class="block-h"><h2>${isHouse() ? 'Cuentas comunes' : 'Cuentas'}</h2><button class="link" data-action="new-account">+ Nueva cuenta</button></div>
     <div class="list">${state.accounts.map(a => {
       const b = balanceOf(a.id);
       return `<button class="row" data-account="${a.id}">${dotHTML(a.color, initials(a.name))}
@@ -418,10 +942,87 @@ views.inicio = () => {
     <div class="list">${budgets.map(({c,spent}) => budgetRow(c, spent)).join('')}</div>
   </section>` : ''}
 
+  ${upcomingBlock()}
+
   <section class="block">
     <div class="block-h"><h2>Últimos movimientos</h2><button class="link" data-goto="movimientos">Ver todos</button></div>
     <div class="list">${recent.map(txRow).join('') || '<div class="empty">Aún no hay movimientos. Pulsa + para añadir el primero.</div>'}</div>
   </section>`;
+};
+
+function inviteBanner(){
+  if (!houseInfo || members().length > 1) return '';
+  return `<div class="invite"><div><b>Invita a tu pareja.</b> En su app: Casa → Unirme con un código.</div>
+    <div class="invite-code"><span class="num">${esc(houseInfo.code)}</span><button class="btn primary small" data-action="copy-code">Copiar</button></div></div>`;
+}
+function houseBlocks(ym){
+  const ms = members();
+  const net = houseBalances();
+  const mes = MESES[Number(ym.slice(5)) - 1];
+  // Quién debe a quién
+  let debt;
+  if (ms.length < 2) debt = `<p class="note" style="margin:0">Cuando tu pareja se una, aquí verás quién debe a quién.</p>`;
+  else if (ms.length === 2){
+    const other = ms.find(m => m.id !== meId); const mine = net[meId] || 0;
+    const txt = Math.abs(mine) < 0.005 ? 'Estáis en paz' : mine > 0 ? `${esc(other.name)} te debe` : `Le debes a ${esc(other.name)}`;
+    debt = `<div class="debt"><div><div class="debt-k">${txt}</div>${Math.abs(mine) >= 0.005 ? `<div class="debt-v num ${mine < 0 ? 'neg' : ''}">${money(Math.abs(mine))}</div>` : ''}</div>
+      ${Math.abs(mine) >= 0.005 ? '<button class="btn ghost small" data-action="settle">Saldar</button>' : ''}</div>
+      <p class="note" style="margin:8px 0 0">Cuenta los gastos que alguien pagó de su bolsillo. Reparto: ${esc(splitLabel())}.</p>`;
+  } else {
+    debt = `<div class="list" style="background:none">${ms.map(m => { const v = net[m.id] || 0; return `<div class="debt-row"><span>${esc(m.id === meId ? 'Tú' : m.name)}</span><span class="num ${v < 0 ? 'neg' : ''}">${Math.abs(v) < 0.005 ? 'En paz' : v > 0 ? 'le deben ' + money(v) : 'debe ' + money(-v)}</span></div>`; }).join('')}</div>
+      <div class="actions" style="margin-top:8px"><button class="btn ghost small" data-action="settle">Saldar una deuda</button></div>`;
+  }
+  // Aportaciones del mes
+  const con = contributionsOf(ym), pocket = paidOutOfPocket(ym);
+  const maxV = Math.max(1, ...ms.map(m => (con[m.id] || 0) + (pocket[m.id] || 0)));
+  const bars = ms.map(m => {
+    const c = con[m.id] || 0, p = pocket[m.id] || 0;
+    return `<div class="contrib">
+      <div class="contrib-top"><span>${esc(m.id === meId ? 'Tú' : m.name)}</span><span class="num"><b>${money(c + p)}</b></span></div>
+      <div class="stack"><i style="width:${(c / maxV * 100).toFixed(1)}%;background:${memberColor(m.id)}"></i><i style="width:${(p / maxV * 100).toFixed(1)}%;background:${memberColor(m.id)};opacity:.45"></i></div>
+      <div class="contrib-sub num">${money(c)} a la cuenta común${p ? ` · ${money(p)} pagado de su bolsillo` : ''}</div>
+    </div>`;
+  }).join('');
+  return `<section class="block"><div class="block-h"><h2>Entre vosotros</h2></div><div class="card">${debt}</div></section>
+  <section class="block"><div class="block-h"><h2>Aportado en ${mes}</h2><button class="link" data-action="new-contribution">+ Aportación</button></div>
+    <div class="card contribs">${bars}</div></section>`;
+}
+
+function upcomingBlock(){
+  const up = upcoming(31);
+  const ym = monthOf(today());
+  const restOfMonth = up.filter(u => monthOf(u.date) === ym).reduce((sum, u) => sum + ((u.r.type === 'ingreso' || u.r.type === 'aportacion') ? u.r.amount : u.r.type === 'gasto' ? -u.r.amount : 0), 0);
+  let inner;
+  if (!state.recurring.length) inner = `<div class="empty">¿Tienes pagos fijos, como el alquiler, el móvil o una suscripción? Prográmalos y se apuntan solos cada mes.<div style="margin-top:12px"><button class="btn primary small" data-action="new-rule">Programar un pago</button></div></div>`;
+  else if (!up.length) inner = `<div class="empty">No hay pagos programados en los próximos 30 días.</div>`;
+  else inner = `<div class="list">${up.slice(0,4).map(u => ruleRow(u.r, u.date)).join('')}</div>
+    ${restOfMonth ? `<p class="note" style="margin:8px 4px 0">Lo que queda de ${MESES[Number(ym.slice(5))-1]}: <b class="num">${restOfMonth>0?'+':'−'}${money(Math.abs(restOfMonth))}</b> en pagos programados.</p>` : ''}`;
+  return `<section class="block">
+    <div class="block-h"><h2>Próximos pagos</h2>${state.recurring.length ? '<button class="link" data-goto="programados">Gestionar</button>' : ''}</div>
+    ${inner}</section>`;
+}
+
+views.programados = () => {
+  const withNext = state.recurring.map(r => ({r, next: nextOf(r)}));
+  const active = withNext.filter(x => x.next).sort((a,b) => a.next.localeCompare(b.next));
+  const done = withNext.filter(x => !x.next);
+  const perMonth = kind => active.filter(x => x.r.type === kind || (kind === 'ingreso' && x.r.type === 'aportacion')).reduce((s, x) => s + x.r.amount * monthlyFactor[x.r.freq], 0);
+  const fixedOut = perMonth('gasto'), fixedIn = perMonth('ingreso');
+  return `
+  <header class="top" style="justify-content:flex-start">
+    <button class="iconbtn" data-goto="inicio" aria-label="Volver a Inicio"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <h1 class="view-title">Pagos programados</h1>
+  </header>
+  ${active.length ? `<div class="summary3" style="grid-template-columns:1fr 1fr;margin-top:0">
+    <div class="stat"><div class="k">Gastos fijos al mes</div><div class="v num">−${money(fixedOut)}</div></div>
+    <div class="stat"><div class="k">Ingresos fijos al mes</div><div class="v num" style="color:var(--in)">+${money(fixedIn)}</div></div>
+  </div>` : ''}
+  <div class="actions" style="margin-top:12px"><button class="btn primary" data-action="new-rule">+ Programar un pago</button></div>
+  <section class="block"><div class="block-h"><h2>Activos</h2></div>
+    <div class="list">${active.map(x => ruleRow(x.r, x.next, true)).join('') || '<div class="empty">No tienes pagos programados activos.</div>'}</div></section>
+  ${done.length ? `<section class="block"><div class="block-h"><h2>Terminados</h2></div>
+    <div class="list">${done.map(x => ruleRow(x.r, null, true)).join('')}</div></section>` : ''}
+  <p class="note" style="margin:14px 4px 0">Cada pago se apunta solo como un movimiento normal el día que toca, en cuanto abres la app. Los importes de gastos fijos al mes son aproximados si hay pagos semanales, trimestrales o anuales.</p>`;
 };
 
 views.movimientos = () => {
@@ -575,7 +1176,7 @@ function lineSVG(){
   const initial = state.accounts.reduce((s,a) => s + (Number(a.initial)||0), 0);
   const vals = months.map(m => {
     let b = initial;
-    for (const t of state.tx) if (monthOf(t.date) <= m){ if (t.type==='ingreso') b += t.amount; if (t.type==='gasto') b -= t.amount; }
+    for (const t of state.tx) if (monthOf(t.date) <= m) b += totalDelta(t);
     return b;
   });
   const lo = Math.min(...vals), hi = Math.max(...vals);
@@ -594,13 +1195,94 @@ function lineSVG(){
     <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>${dots}${labels}</svg>`;
 }
 
+let pushState = 'checking';
+function houseSettings(){
+  const ms = members(); const sh = shares();
+  const presets = [50, 60, 70, 40, 30];
+  const other = ms.find(m => m.id !== meId);
+  const mine = Math.round((sh[meId] || 0) * 100);
+  return `<section class="block" style="margin-top:4px"><div class="block-h"><h2>${esc(houseInfo.name)}</h2></div>
+    <div class="list">${ms.map(m => `<div class="row">${memberDot(m.id)}<span class="main"><span class="t">${esc(m.name)}${m.id === meId ? ' (tú)' : ''}</span></span>
+      ${m.id === meId ? '<button class="btn ghost small" data-action="rename-me">Cambiar nombre</button>' : ''}</div>`).join('')}</div>
+    <div class="card" style="margin-top:8px">
+      <p style="margin:0;font-weight:600">Código para invitar</p>
+      <p class="note" style="margin:2px 0 10px">Quien lo tenga puede entrar en esta casa y ver sus datos. Compártelo solo con tu pareja.</p>
+      <div class="invite-code"><span class="num">${esc(houseInfo.code)}</span><button class="btn primary small" data-action="copy-code">Copiar</button></div>
+      <button class="link" data-action="new-code" style="margin-top:6px">Cambiar el código</button>
+    </div></section>
+  ${ms.length === 2 ? `<section class="block"><div class="block-h"><h2>Reparto de los gastos comunes</h2></div>
+    <div class="card"><p class="note" style="margin:0 0 10px">Se usa cuando alguien paga un gasto de casa de su bolsillo, para calcular quién debe a quién.</p>
+    <div class="chips">${presets.map(v => `<button type="button" class="chip" data-share="${v}" aria-pressed="${mine === v}">Tú ${v} % · ${esc(other.name)} ${100 - v} %</button>`).join('')}</div></div></section>` : ''}
+  <section class="block"><div class="block-h"><h2>Avisos</h2></div>
+    <div class="card"><p class="note" style="margin:0">Los avisos de casa llegan a cada uno a su iPhone. Se activan desde el espacio Personal, en Ajustes.</p></div></section>`;
+}
+function leaveHouseCard(){
+  return `<section class="block"><div class="card">
+    <p style="margin:0;font-weight:600">Salir de ${esc(houseInfo.name)}</p>
+    <p class="note" style="margin:2px 0 10px">Dejarás de ver los datos de casa. Los demás los seguirán teniendo. Para volver necesitarás el código.</p>
+    <button class="btn danger small" data-action="leave-house" style="width:100%">Salir de la casa</button></div></section>`;
+}
+async function leaveHouse(btn){
+  confirmInline(btn, 'Pulsa otra vez para salir', async () => {
+    const {error} = await cloud.from('household_members').delete().eq('household_id', houseInfo.id).eq('user_id', meId);
+    if (error){ toast('No se pudo salir. Revisa la conexión'); return; }
+    if (houseChannel){ cloud.removeChannel(houseChannel); houseChannel = null; }
+    spaces.house = null; houseInfo = null; ui.space = 'personal'; state = spaces.personal.data; writeCache(); go('inicio'); toast('Has salido de la casa');
+  });
+}
+function copyCode(btn){
+  const code = houseInfo?.code; if (!code) return;
+  const ok = () => toast('Código copiado');
+  try { navigator.clipboard.writeText(code).then(ok, () => toast(`El código es ${code}`)); } catch(e){ toast(`El código es ${code}`); }
+}
+async function newCode(){
+  const {data, error} = await cloud.rpc('regenerate_invite_code', {hid: houseInfo.id});
+  if (error){ toast('No se pudo cambiar el código'); return; }
+  houseInfo.code = data; writeCache(); render(); toast('Código cambiado. El anterior ya no sirve');
+}
+function renameMe(){
+  const cur = members().find(m => m.id === meId)?.name || myName;
+  openSheet(`<h2>Tu nombre en ${esc(houseInfo.name)}</h2>
+    <input class="field" id="rn" value="${esc(cur)}" maxlength="20">
+    <div class="err" id="rn-err"></div>
+    <div class="actions"><button class="btn primary" id="rn-go">Guardar</button></div>`, sheet => {
+    sheet.querySelector('#rn-go').onclick = async () => {
+      const v = sheet.querySelector('#rn').value.trim();
+      if (!v){ sheet.querySelector('#rn-err').textContent = 'Escribe un nombre.'; return; }
+      const {error} = await cloud.rpc('rename_member', {hid: houseInfo.id, p_display_name: v});
+      if (error){ sheet.querySelector('#rn-err').textContent = 'No se pudo guardar. Revisa la conexión.'; return; }
+      closeSheet(); await loadMembers(); toast('Nombre cambiado');
+    };
+  });
+}
 views.ajustes = () => {
   const gastos = state.categories.filter(c => c.kind==='gasto'), ingresos = state.categories.filter(c => c.kind==='ingreso');
   const catRow = c => `<button class="row" data-cat="${c.id}">${dotHTML(c.color, initials(c.name))}<span class="main"><span class="t">${esc(c.name)}</span></span><span class="note">Editar</span></button>`;
+  if (CLOUD && pushState === 'checking') pushSubscriptionState().then(s => { pushState = s; if (ui.tab === 'ajustes') render(); });
+  const pushRow = CLOUD ? `<section class="block" style="margin-top:4px"><div class="block-h"><h2>Notificaciones</h2></div>
+    <div class="card">
+      <div class="bud-top">
+        <span class="main"><span class="t">Avisos en este iPhone</span><span class="s">La noche antes de un pago programado, y si te acercas o te pasas de un presupuesto (tuyo o de casa)</span></span>
+        ${pushState === 'unsupported' ? '<span class="note">No disponible</span>'
+          : pushState === 'denied' ? '<span class="note">Bloqueado en Ajustes del iPhone</span>'
+          : `<button class="switch" id="push-toggle" aria-pressed="${pushState==='on'}" aria-label="Activar notificaciones"></button>`}
+      </div>
+    </div></section>` : '';
+  const house = isHouse();
+  const accountRow = CLOUD && cloudUser && !house ? `<section class="block" style="margin-top:4px"><div class="block-h"><h2>Tu cuenta</h2></div>
+    <div class="card"><div class="bud-top"><span class="main"><span class="t">${esc(cloudUser.email)}</span><span class="s">Tus datos están guardados en la nube</span></span>
+      <button class="btn ghost small" data-action="signout">Salir</button></div></div></section>` : '';
   return `
   <header class="top"><h1 class="view-title">Ajustes</h1></header>
   ${!storageOK ? '<div class="demo"><span><b>Aviso:</b> este navegador no deja guardar datos. Los cambios se perderán al cerrar.</span></div>' : ''}
-  <section class="block" style="margin-top:4px"><div class="block-h"><h2>Cuentas</h2><button class="link" data-action="new-account">+ Nueva</button></div>
+  ${house ? houseSettings() : accountRow + pushRow}
+  ${!CLOUD ? `<section class="block" style="margin-top:4px"><div class="card"><p style="margin:0;font-weight:600">Guardado solo en este dispositivo</p>
+    <p class="note" style="margin:2px 0 0">La app no está conectada a ningún servidor (config.js está vacío). Por eso no hay cuentas de usuario ni espacio de Casa.</p></div></section>` : ''}
+  <section class="block" style="margin-top:4px"><div class="list">
+    <button class="row" data-goto="programados"><span class="dot" style="background:var(--accent-soft);color:var(--accent)">↻</span>
+      <span class="main"><span class="t">Pagos programados</span><span class="s">${state.recurring.filter(r => nextOf(r)).length} activos</span></span><span class="note">›</span></button>
+  </div></section>
+  <section class="block" style="margin-top:4px"><div class="block-h"><h2>${house ? 'Cuentas comunes' : 'Cuentas'}</h2><button class="link" data-action="new-account">+ Nueva</button></div>
     <div class="list">${state.accounts.map(a => `<button class="row" data-account="${a.id}">${dotHTML(a.color, initials(a.name))}<span class="main"><span class="t">${esc(a.name)}</span><span class="s">${TIPOS_CUENTA[a.type]} · saldo inicial ${money(a.initial||0)}</span></span><span class="note">Editar</span></button>`).join('')}</div></section>
   <section class="block"><div class="block-h"><h2>Categorías de gasto</h2><button class="link" data-action="new-cat" data-kind="gasto">+ Nueva</button></div>
     <div class="list">${gastos.map(catRow).join('')}</div></section>
@@ -608,17 +1290,110 @@ views.ajustes = () => {
     <div class="list">${ingresos.map(catRow).join('')}</div></section>
   <section class="block"><div class="block-h"><h2>Tus datos</h2></div>
     <div class="card">
-      <p class="note" style="margin:0 0 12px">Todo se guarda solo en este dispositivo. Haz una copia de vez en cuando y guárdala en Notas o en un correo.</p>
+      <p class="note" style="margin:0 0 12px">${house ? 'Los datos de casa se guardan en la nube y los ve todo el que está en la casa. Puedes copiar una copia de seguridad cuando quieras.' : CLOUD ? 'Se guardan en tu cuenta en la nube. Aun así, una copia de vez en cuando no está de más.' : 'Todo se guarda solo en este dispositivo. Haz una copia de vez en cuando y guárdala en Notas o en un correo.'}</p>
+      ${house ? '<button class="btn ghost small" data-action="backup" style="width:100%">Copiar copia de casa</button>' : `
       <div class="two"><button class="btn ghost small" data-action="backup">Copiar copia</button><button class="btn ghost small" data-action="restore">Restaurar copia</button></div>
-      <div style="margin-top:8px"><button class="btn danger small" data-action="reset" style="width:100%">Borrar todo</button></div>
-    </div></section>`;
+      <div style="margin-top:8px"><button class="btn danger small" data-action="reset" style="width:100%">Borrar todo</button></div>`}
+    </div></section>${house ? leaveHouseCard() : ''}`;
 };
 
 /* ---------- Render ---------- */
 const appEl = document.getElementById('app');
 function render(){
-  appEl.innerHTML = views[ui.tab]();
+  if (CLOUD && cloudStatus !== 'ready') return;          // aún en la pantalla de acceso
+  const noHouse = ui.space === 'house' && (!CLOUD || !spaces.house);
+  document.querySelector('.tabbar').hidden = noHouse;
+  document.getElementById('fab').hidden = noHouse;
+  appEl.innerHTML = spaceSwitcher() + (noHouse ? (CLOUD ? houseOnboarding() : houseNeedsServer()) : views[ui.tab]());
   document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-current', b.dataset.tab === ui.tab ? 'page' : 'false'));
+}
+
+/* Selector Personal / Casa */
+function spaceSwitcher(){
+  return `<div class="spacebar">
+    <div class="seg seg2" role="tablist" aria-label="Espacio">
+      <button type="button" data-space="personal" aria-pressed="${ui.space === 'personal'}">Personal</button>
+      <button type="button" data-space="house" aria-pressed="${ui.space === 'house'}">${esc(houseInfo?.name || 'Casa')}</button>
+    </div>
+    ${CLOUD ? `<span class="syncflag" id="syncflag" ${syncState === 'ok' ? 'hidden' : ''}>Sin conexión · se guardará al volver</span>` : ''}
+  </div>`;
+}
+function switchSpace(k){
+  if (k === ui.space) return;
+  ui.space = k; ui.filterAccount = 'todas';
+  if (spaces[k]) state = spaces[k].data;
+  if (CLOUD && k === 'house' && spaces.house) refreshSpace(spaces.house);
+  writeCache();
+  render(); window.scrollTo(0, 0);
+}
+
+/* Casa cuando la app no está conectada a Supabase (config.js vacío) */
+function houseNeedsServer(){
+  return `
+  <header class="top"><h1 class="view-title">Casa compartida</h1></header>
+  <div class="card">
+    <p style="margin:0 0 6px;font-weight:600">Falta conectar la app a tu servidor</p>
+    <p class="note" style="margin:0">Ahora mismo la app guarda todo solo en este dispositivo, así que no puede compartir nada con tu pareja. Para usar Casa, cada uno necesita su cuenta, y eso lo pone Supabase.</p>
+  </div>
+  <section class="block"><div class="block-h"><h2>Qué hay que hacer</h2></div>
+    <div class="card steps">
+      <p><b>1.</b> Crea el proyecto en Supabase y ejecuta <code>schema.sql</code>.</p>
+      <p><b>2.</b> Sube la app a tu dominio de Hostinger.</p>
+      <p><b>3.</b> Abre <code>config.js</code> en el Administrador de archivos de Hostinger y pega tu Project URL y tu clave anon de Supabase.</p>
+      <p><b>4.</b> Abre la app desde tu dominio: te pedirá crear una cuenta y aquí aparecerá Casa.</p>
+      <p class="note" style="margin:10px 0 0">La guía paso a paso está en el archivo README.md, dentro del .zip «cuentas-claras-servidor».</p>
+    </div></section>`;
+}
+
+/* Pantalla de Casa cuando aún no perteneces a ninguna */
+function houseOnboarding(){
+  return `
+  <header class="top"><h1 class="view-title">Casa compartida</h1></header>
+  <div class="card">
+    <p style="margin:0 0 6px;font-weight:600">Las cuentas de casa, entre los dos</p>
+    <p class="note" style="margin:0">Un espacio que veis y editáis los dos: la cuenta común, el alquiler, la compra… Apunta quién paga cada cosa y la app calcula quién debe a quién. Tu espacio Personal sigue siendo solo tuyo.</p>
+  </div>
+  <section class="block"><div class="block-h"><h2>Crear una casa</h2></div>
+    <div class="card">
+      <label class="flabel" for="h-name" style="margin-top:0">Nombre</label><input class="field" id="h-name" value="Casa" maxlength="24">
+      <label class="flabel" for="h-me">Tu nombre (lo verá tu pareja)</label><input class="field" id="h-me" value="${esc(myName)}" maxlength="20">
+      <div class="err" id="h-err"></div>
+      <div class="actions" style="margin-top:10px"><button class="btn primary" data-action="house-create">Crear casa</button></div>
+    </div></section>
+  <section class="block"><div class="block-h"><h2>Unirme con un código</h2></div>
+    <div class="card">
+      <p class="note" style="margin:0 0 4px">Si tu pareja ya ha creado la casa, pídele el código que aparece en su app, en Ajustes.</p>
+      <label class="flabel" for="j-code">Código</label><input class="field num" id="j-code" placeholder="8F3A1-C07B2" autocapitalize="characters" autocomplete="off" maxlength="11" style="letter-spacing:.08em">
+      <label class="flabel" for="j-me">Tu nombre</label><input class="field" id="j-me" value="${esc(myName)}" maxlength="20">
+      <div class="err" id="j-err"></div>
+      <div class="actions" style="margin-top:10px"><button class="btn primary" data-action="house-join">Unirme</button></div>
+    </div></section>`;
+}
+async function createHouse(btn){
+  const name = document.getElementById('h-name').value.trim() || 'Casa';
+  const me = document.getElementById('h-me').value.trim() || myName;
+  const err = document.getElementById('h-err');
+  btn.disabled = true; btn.textContent = 'Creando…';
+  const {error} = await cloud.rpc('create_household', {p_name: name, p_display_name: me});
+  if (error){ err.textContent = 'No se pudo crear. Revisa la conexión e inténtalo otra vez.'; btn.disabled = false; btn.textContent = 'Crear casa'; return; }
+  await loadHouse(); ui.space = 'house'; state = spaces.house.data; writeCache(); go('inicio');
+  toast('Casa creada. Invita a tu pareja con el código');
+}
+async function joinHouse(btn){
+  const code = document.getElementById('j-code').value.trim().toUpperCase();
+  const me = document.getElementById('j-me').value.trim() || myName;
+  const err = document.getElementById('j-err');
+  if (code.replace('-', '').length < 10){ err.textContent = 'El código tiene 10 letras y números, por ejemplo 8F3A1-C07B2.'; return; }
+  btn.disabled = true; btn.textContent = 'Uniéndome…';
+  const {error} = await cloud.rpc('join_household', {p_code: code, p_display_name: me});
+  if (error){
+    err.textContent = /codigo_invalido/.test(error.message) ? 'Ese código no existe. Revísalo con tu pareja: puede que lo haya cambiado.'
+                    : /casa_llena/.test(error.message) ? 'Esa casa ya tiene el máximo de 6 personas.'
+                    : 'No se pudo unir. Revisa la conexión e inténtalo otra vez.';
+    btn.disabled = false; btn.textContent = 'Unirme'; return;
+  }
+  await loadHouse(); ui.space = 'house'; state = spaces.house.data; writeCache(); go('inicio');
+  toast(`Ya estás en ${houseInfo.name}`);
 }
 function go(tab){
   ui.tab = tab; try { localStorage.setItem(STORAGE_KEY+'-tab', tab); } catch(e){}
@@ -694,66 +1469,207 @@ function confirmInline(btn, text, onYes){
   setTimeout(() => { if (btn.isConnected){ delete btn.dataset.armed; btn.textContent = old; } }, 3500);
 }
 
-/* ---------- Añadir / editar movimiento ---------- */
-function openTx(existing){
+/* ---------- Añadir / editar movimiento o pago programado ----------
+   openTx()                     → nuevo movimiento
+   openTx(null, {freq:'monthly'}) → nuevo pago programado (ya con "Cada mes")
+   openTx(tx)                   → editar un movimiento
+   openTx(null, {rule})         → editar un pago programado */
+function openTx(existing, opts = {}){
   if (!state.accounts.length){ toast('Primero crea una cuenta'); openAccount(); return; }
-  const t = existing ? {...existing} : {type:'gasto', amount:'', accountId: ui.lastAccount && acc(ui.lastAccount) ? ui.lastAccount : state.accounts[0].id, categoryId:null, toAccountId:null, date: today(), note:''};
-  const titles = {gasto:'gasto', ingreso:'ingreso', transferencia:'transferencia'};
+  const rule = opts.rule || null;
+  const mode = rule ? 'rule' : existing ? 'tx' : 'new';
+  const base = {type:'gasto', amount:'', accountId: ui.lastAccount && acc(ui.lastAccount) ? ui.lastAccount : state.accounts[0].id,
+    categoryId:null, toAccountId:null, date: today(), note:'', freq:'none', endMode:'never', endDate:'', count:'',
+    paidBy:null, split:'default', memberId: meId};
+  const t = rule ? {...base, ...rule, date: rule.start, freq: rule.freq === 'once' ? 'none' : rule.freq,
+                    endMode: rule.count ? 'count' : rule.endDate ? 'date' : 'never', endDate: rule.endDate || '', count: rule.count || ''}
+          : existing ? {...base, ...existing}
+          : {...base, freq: opts.freq || 'none', type: opts.type || 'gasto'};
+  if (opts.preset) Object.assign(t, opts.preset);
+  if (t.split == null) t.split = 'default';
+  if (!t.memberId) t.memberId = meId;
+  const parentRule = mode === 'tx' && existing.recurringId ? state.recurring.find(r => r.id === existing.recurringId) : null;
+  const titles = {gasto:'gasto', ingreso:'ingreso', transferencia:'transferencia', aportacion:'aportación', liquidacion:'pago entre vosotros'};
+  const fem = {transferencia:true, aportacion:true};
+  const house = isHouse();
+  const types = house ? ['gasto','ingreso','transferencia','aportacion'] : ['gasto','ingreso','transferencia'];
+  const typeLabel = {gasto:'Gasto', ingreso:'Ingreso', transferencia: house ? 'Transf.' : 'Transferencia', aportacion:'Aportación'};
+
+  // ¿Se guardará como pago programado (y no como movimiento normal)?
+  const willSchedule = () => mode === 'rule' || (mode === 'new' && (t.freq !== 'none' || (t.date && t.date > today())));
+  // Regla "de prueba" con lo que hay escrito ahora, para la vista previa
+  function draftRule(){
+    return {start: t.date, freq: t.freq === 'none' ? 'once' : t.freq,
+      endDate: t.freq !== 'none' && t.endMode === 'date' && t.endDate ? t.endDate : null,
+      count: t.freq !== 'none' && t.endMode === 'count' ? (parseInt(t.count, 10) || null) : null,
+      last: mode === 'rule' ? rule.last : null};
+  }
+  function preview(){
+    if (!t.date || mode === 'tx') return '';
+    const r = draftRule(); const td = today();
+    if (t.freq === 'none'){
+      if (t.date > td) return `Se apuntará solo el <b>${fmtDay(t.date, true)}</b>. Hasta entonces no resta de tu saldo.`;
+      return '';
+    }
+    const all = []; eachOccurrence(r, d => { all.push(d); return all.length < 3000; });
+    const pastNew = mode === 'new' ? all.filter(d => d <= td).length : 0;
+    const next = all.filter(d => d > td && (!r.last || d > r.last)).slice(0, 3);
+    let txt = `<b>${describeRule(r)}</b>.`;
+    if (next.length) txt += ` Próximos: ${next.map(d => fmtDay(d)).join(', ')}.`;
+    if ((r.count || r.endDate) && all.length) txt += ` Último pago: ${fmtDay(all[all.length-1], true)} (${all.length} en total).`;
+    if (pastNew) txt += ` <br>Como el primer pago ya pasó, se apuntarán ahora ${pastNew === 1 ? 'ese pago' : `los ${pastNew} pagos que ya han pasado`}.`;
+    return txt;
+  }
 
   function body(){
     const cats = state.categories.filter(c => c.kind === (t.type === 'ingreso' ? 'ingreso' : 'gasto'));
-    const accChips = (key, exclude) => `<div class="chips">${state.accounts.filter(a => a.id !== exclude).map(a => `<button type="button" class="chip" data-pick="${key}" data-id="${a.id}" aria-pressed="${t[key]===a.id}"><span class="sw" style="background:${a.color}"></span>${esc(a.name)} <span class="note num">${eur0.format(balanceOf(a.id))}</span></button>`).join('')}</div>`;
+    const memberChips = (key, exclude) => `<div class="chips">${members().filter(m => m.id !== exclude).map(m => `<button type="button" class="chip" data-pick="${key}" data-id="${m.id}" aria-pressed="${t[key]===m.id}"><span class="sw" style="background:${memberColor(m.id)}"></span>${m.id === meId ? 'Yo' : esc(m.name)}</button>`).join('')}</div>`;
+    const accChips = (key, exclude) => `<div class="chips">${state.accounts.filter(a => a.id !== exclude).map(a => `<button type="button" class="chip" data-pick="${key}" data-id="${a.id}" aria-pressed="${t[key]===a.id && !(key === 'accountId' && t.paidBy && t.type === 'gasto')}"><span class="sw" style="background:${a.color}"></span>${esc(a.name)} <span class="note num">${eur0.format(balanceOf(a.id))}</span></button>`).join('')}</div>`;
+    const heading = mode === 'rule' ? 'Editar pago programado' : `${mode === 'tx' ? 'Editar' : fem[t.type] ? 'Nueva' : 'Nuevo'} ${titles[t.type]}`;
+    const saveLabel = mode === 'rule' ? 'Guardar cambios' : mode === 'tx' ? `Guardar ${titles[t.type]}` : willSchedule() ? `Programar ${titles[t.type]}` : `Guardar ${titles[t.type]}`;
+    const pv = preview();
     return `
-      <h2>${existing ? 'Editar' : 'Nuevo'} ${titles[t.type]}</h2>
-      <div class="seg">${['gasto','ingreso','transferencia'].map(k => `<button type="button" data-type="${k}" aria-pressed="${t.type===k}">${k[0].toUpperCase()+k.slice(1)}</button>`).join('')}</div>
+      <h2>${heading}</h2>
+      ${parentRule ? `<div class="series-note"><span>↻ Viene de un pago programado: <b>${describeRule(parentRule)}</b>. Cambiar este movimiento no cambia los siguientes.</span><button type="button" class="btn ghost small" id="f-series">Editar la serie</button></div>` : ''}
+      ${t.type === 'liquidacion' ? '' : `<div class="seg" style="grid-template-columns:repeat(${types.length},1fr)">${types.map(k => `<button type="button" data-type="${k}" aria-pressed="${t.type===k}">${typeLabel[k]}</button>`).join('')}</div>`}
       <label class="amount-in"><input id="f-amount" inputmode="decimal" autocomplete="off" placeholder="0,00" value="${t.amount!=='' ? String(t.amount).replace('.',',') : ''}" aria-label="Importe"><span>€</span></label>
       ${t.type === 'transferencia' ? `
         <span class="flabel">Desde</span>${accChips('accountId')}
         <span class="flabel">Hacia</span>${accChips('toAccountId', t.accountId)}
+      ` : t.type === 'aportacion' ? `
+        <span class="flabel">Quién aporta</span>${memberChips('memberId')}
+        <span class="flabel">A la cuenta</span>${accChips('accountId')}
+      ` : t.type === 'liquidacion' ? `
+        <span class="flabel">Paga</span>${memberChips('from')}
+        <span class="flabel">Recibe</span>${memberChips('to', t.from)}
+        <p class="note" style="margin:10px 2px 0">Dinero que os pasáis entre vosotros (Bizum, efectivo…) para quedar en paz. No toca las cuentas comunes.</p>
       ` : `
         <span class="flabel">Categoría</span>
         <div class="catgrid">${cats.map(c => `<button type="button" class="cat" data-pick="categoryId" data-id="${c.id}" aria-pressed="${t.categoryId===c.id}"><span class="sw" style="background:${c.color}"></span>${esc(c.name)}</button>`).join('')}</div>
         <span class="flabel">${t.type==='ingreso' ? 'Entra en' : 'Pagado con'}</span>${accChips('accountId')}
+        ${house && t.type === 'gasto' ? `
+          <span class="flabel">O lo pagó alguien de su bolsillo</span>
+          <div class="chips">${members().map(m => `<button type="button" class="chip" data-payer="${m.id}" aria-pressed="${t.paidBy===m.id}"><span class="sw" style="background:${memberColor(m.id)}"></span>${m.id === meId ? 'Yo' : esc(m.name)}</button>`).join('')}</div>
+          ${t.paidBy ? `
+            <span class="flabel">¿De quién es el gasto?</span>
+            <div class="chips">
+              <button type="button" class="chip" data-split="default" aria-pressed="${t.split==='default'}">De los dos · ${esc(splitLabel())}</button>
+              ${members().map(m => `<button type="button" class="chip" data-split="only:${m.id}" aria-pressed="${t.split==='only:'+m.id}">Solo ${m.id === meId ? 'mío' : 'de ' + esc(m.name)}</button>`).join('')}
+            </div>` : ''}
+        ` : ''}
       `}
       <div class="two" style="margin-top:14px">
-        <div><label class="flabel" for="f-date" style="margin-top:0">Fecha</label><input class="field" type="date" id="f-date" value="${t.date}"></div>
-        <div><label class="flabel" for="f-note" style="margin-top:0">Nota</label><input class="field" id="f-note" placeholder="Opcional" value="${esc(t.note)}" maxlength="60"></div>
+        <div><label class="flabel" for="f-date" style="margin-top:0">${t.freq !== 'none' ? 'Primer pago' : 'Fecha'}</label><input class="field" type="date" id="f-date" value="${t.date}"></div>
+        <div><label class="flabel" for="f-note" style="margin-top:0">Nota</label><input class="field" id="f-note" placeholder="${t.type === 'liquidacion' ? 'Ej.: Bizum' : mode === 'tx' ? 'Opcional' : 'Ej.: Alquiler'}" value="${esc(t.note)}" maxlength="60"></div>
       </div>
+      ${mode !== 'tx' && t.type !== 'liquidacion' ? `
+        <span class="flabel">Repetir</span>
+        <div class="chips">${Object.entries(FREQS).map(([k,l]) => `<button type="button" class="chip" data-freq="${k}" aria-pressed="${t.freq===k}">${l}</button>`).join('')}</div>
+        ${t.freq !== 'none' ? `
+          <span class="flabel">Termina</span>
+          <div class="chips">
+            <button type="button" class="chip" data-end="never" aria-pressed="${t.endMode==='never'}">Nunca</button>
+            <button type="button" class="chip" data-end="date" aria-pressed="${t.endMode==='date'}">En una fecha</button>
+            <button type="button" class="chip" data-end="count" aria-pressed="${t.endMode==='count'}">Tras un nº de pagos</button>
+          </div>
+          ${t.endMode === 'date' ? `<label class="flabel" for="f-end">Último pago como muy tarde</label><input class="field" type="date" id="f-end" value="${t.endDate}" min="${t.date}">` : ''}
+          ${t.endMode === 'count' ? `<div class="countrow"><input class="field num" id="f-count" inputmode="numeric" pattern="[0-9]*" placeholder="12" value="${t.count}" aria-label="Número de pagos"><span>pagos en total</span></div>` : ''}
+        ` : ''}
+      ` : ''}
+      ${pv ? `<p class="preview">${pv}</p>` : ''}
       <div class="err" id="f-err"></div>
       <div class="actions">
-        <button class="btn primary" id="f-save">Guardar ${titles[t.type]}</button>
-        ${existing ? `<button class="btn danger" id="f-del">Eliminar</button>` : ''}
+        <button class="btn primary" id="f-save">${saveLabel}</button>
+        ${mode === 'tx' ? `<button class="btn danger" id="f-del">Eliminar</button>` : ''}
+        ${mode === 'rule' ? `<button class="btn danger" id="f-del">Eliminar pago programado</button>` : ''}
       </div>`;
   }
 
   openSheet(body(), sheet => {
-    const readFields = () => { t.amount = sheet.querySelector('#f-amount').value; t.date = sheet.querySelector('#f-date').value; t.note = sheet.querySelector('#f-note').value; };
-    const rerender = () => { readFields(); const grab = '<div class="grab"></div>'; sheet.innerHTML = grab + body(); };
+    const readFields = () => {
+      t.amount = sheet.querySelector('#f-amount').value; t.date = sheet.querySelector('#f-date').value; t.note = sheet.querySelector('#f-note').value;
+      const e = sheet.querySelector('#f-end'); if (e) t.endDate = e.value;
+      const c = sheet.querySelector('#f-count'); if (c) t.count = c.value;
+    };
+    const rerender = () => { readFields(); const top = sheet.scrollTop; sheet.innerHTML = '<div class="grab"></div>' + body(); sheet.scrollTop = top; };
+    // Al cambiar fechas o número de pagos, se actualiza la vista previa
+    sheet.addEventListener('change', e => { if (e.target.matches('#f-date, #f-end, #f-count')) rerender(); });
     sheet.addEventListener('click', e => {
       const typ = e.target.closest('[data-type]');
-      if (typ){ const nt = typ.dataset.type; if (nt !== t.type){ t.type = nt; t.categoryId = null; if (nt==='transferencia'){ t.toAccountId = state.accounts.find(a => a.id !== t.accountId)?.id ?? null; } } rerender(); return; }
+      if (typ){ const nt = typ.dataset.type; if (nt !== t.type){ t.type = nt; t.categoryId = null; if (nt !== 'gasto') t.paidBy = null; if (nt==='transferencia'){ t.toAccountId = state.accounts.find(a => a.id !== t.accountId)?.id ?? null; } } rerender(); return; }
       const pick = e.target.closest('[data-pick]');
-      if (pick){ t[pick.dataset.pick] = pick.dataset.id; if (t.type==='transferencia' && t.toAccountId === t.accountId) t.toAccountId = state.accounts.find(a => a.id !== t.accountId)?.id ?? null; rerender(); return; }
+      if (pick){ t[pick.dataset.pick] = pick.dataset.id; if (pick.dataset.pick === 'accountId') t.paidBy = null;
+        if (t.type === 'liquidacion' && t.to === t.from) t.to = members().find(m => m.id !== t.from)?.id ?? null;
+        if (t.type==='transferencia' && t.toAccountId === t.accountId) t.toAccountId = state.accounts.find(a => a.id !== t.accountId)?.id ?? null; rerender(); return; }
+      const fq = e.target.closest('[data-freq]'); if (fq){ t.freq = fq.dataset.freq; rerender(); return; }
+      const py = e.target.closest('[data-payer]'); if (py){ t.paidBy = py.dataset.payer; rerender(); return; }
+      const sp = e.target.closest('[data-split]'); if (sp){ t.split = sp.dataset.split; rerender(); return; }
+      const en = e.target.closest('[data-end]'); if (en){ t.endMode = en.dataset.end; rerender(); if (t.endMode === 'count') sheet.querySelector('#f-count')?.focus(); return; }
+      if (e.target.closest('#f-series')){ closeSheet(); openTx(null, {rule: parentRule}); return; }
       if (e.target.closest('#f-save')){
         readFields();
         const amount = parseAmount(t.amount);
         const err = sheet.querySelector('#f-err');
         if (!(amount > 0)) { err.textContent = 'Escribe un importe mayor que 0.'; return; }
-        if (t.type !== 'transferencia' && !t.categoryId){ err.textContent = 'Elige una categoría.'; return; }
+        const needsCat = t.type === 'gasto' || t.type === 'ingreso';
+        if (needsCat && !t.categoryId){ err.textContent = 'Elige una categoría.'; return; }
+        if (t.type === 'aportacion' && (!t.memberId || !acc(t.accountId))){ err.textContent = 'Elige quién aporta y a qué cuenta.'; return; }
+        if (t.type === 'liquidacion' && (!t.from || !t.to || t.from === t.to)){ err.textContent = 'Elige quién paga y quién recibe.'; return; }
+        if ((t.type === 'gasto' || t.type === 'ingreso') && !t.paidBy && !acc(t.accountId)){ err.textContent = 'Elige con qué cuenta se pagó.'; return; }
         if (t.type === 'transferencia' && (!t.toAccountId || t.toAccountId === t.accountId)){ err.textContent = 'Elige dos cuentas distintas. Si solo tienes una, crea otra en Ajustes.'; return; }
         if (!t.date){ err.textContent = 'Elige una fecha.'; return; }
-        const rec = {id: t.id || uid(), type:t.type, amount, accountId:t.accountId, date:t.date, note:t.note.trim(), created: t.created || Date.now()};
-        if (t.type === 'transferencia') rec.toAccountId = t.toAccountId; else rec.categoryId = t.categoryId;
+
+        if (willSchedule()){
+          let count = null, endDate = null;
+          if (t.freq !== 'none' && t.endMode === 'count'){ count = parseInt(t.count, 10); if (!(count >= 1)){ err.textContent = 'Escribe cuántos pagos habrá en total, por ejemplo 12.'; return; } }
+          if (t.freq !== 'none' && t.endMode === 'date'){ if (!t.endDate || t.endDate < t.date){ err.textContent = 'La fecha de fin tiene que ser igual o posterior al primer pago.'; return; } endDate = t.endDate; }
+          const r = {id: rule?.id || uid(), type:t.type, amount, note:t.note.trim(),
+            freq: t.freq === 'none' ? 'once' : t.freq, start:t.date, endDate, count, last: rule?.last ?? null};
+          Object.assign(r, typeFields(t));
+          if (rule) state.recurring = state.recurring.map(x => x.id === r.id ? r : x); else state.recurring.push(r);
+          const made = runRecurring(state);
+          ui.lastAccount = t.accountId;
+          closeSheet(); commit();
+          const nx = nextOf(r);
+          toast(made ? (made === 1 ? 'Programado. Se ha apuntado 1 pago' : `Programado. Se han apuntado ${made} pagos`)
+                     : rule ? 'Pago programado actualizado' : nx ? `Programado para el ${fmtDay(nx)}` : 'Programado');
+          return;
+        }
+
+        const rec = {id: t.id || uid(), type:t.type, amount, date:t.date, note:t.note.trim(), created: t.created || Date.now(), ...typeFields(t)};
+        if (t.recurringId) rec.recurringId = t.recurringId;
         if (existing) state.tx = state.tx.map(x => x.id === rec.id ? rec : x); else state.tx.push(rec);
         ui.lastAccount = t.accountId;
-        closeSheet(); commit(); toast(existing ? 'Cambios guardados' : `${titles[t.type][0].toUpperCase()+titles[t.type].slice(1)} guardado`);
+        closeSheet(); commit(); toast(existing ? 'Cambios guardados' : `${titles[t.type][0].toUpperCase()+titles[t.type].slice(1)} ${fem[t.type] ? 'guardada' : 'guardado'}`);
         return;
       }
       const del = e.target.closest('#f-del');
-      if (del) confirmInline(del, 'Pulsa otra vez para eliminar', () => { state.tx = state.tx.filter(x => x.id !== t.id); closeSheet(); commit(); toast('Movimiento eliminado'); });
+      if (del && mode === 'rule') confirmInline(del, 'Pulsa otra vez. Lo ya apuntado se queda', () => { state.recurring = state.recurring.filter(x => x.id !== rule.id); closeSheet(); commit(); toast('Pago programado eliminado'); });
+      else if (del) confirmInline(del, 'Pulsa otra vez para eliminar', () => { state.tx = state.tx.filter(x => x.id !== t.id); closeSheet(); commit(); toast('Movimiento eliminado'); });
     });
-    if (!existing) setTimeout(() => sheet.querySelector('#f-amount')?.focus(), 250);
+    if (mode === 'new') setTimeout(() => sheet.querySelector('#f-amount')?.focus(), 250);
   });
+}
+
+// Los campos que guarda cada tipo de movimiento
+function typeFields(t){
+  switch (t.type){
+    case 'transferencia': return {accountId: t.accountId, toAccountId: t.toAccountId};
+    case 'aportacion':    return {accountId: t.accountId, memberId: t.memberId};
+    case 'liquidacion':   return {accountId: null, from: t.from, to: t.to};
+    case 'gasto':         return t.paidBy ? {accountId: null, categoryId: t.categoryId, paidBy: t.paidBy, split: t.split || 'default'} : {accountId: t.accountId, categoryId: t.categoryId};
+    default:              return {accountId: t.accountId, categoryId: t.categoryId};
+  }
+}
+
+/* Saldar cuentas entre los dos */
+function openSettle(){
+  const ms = members(); const net = houseBalances();
+  const debtor = ms.filter(m => (net[m.id] || 0) < -0.005).sort((a,b) => net[a.id] - net[b.id])[0];
+  const creditor = ms.filter(m => (net[m.id] || 0) > 0.005).sort((a,b) => net[b.id] - net[a.id])[0];
+  if (!debtor || !creditor){ toast('Estáis en paz'); return; }
+  const amount = Math.min(-net[debtor.id], net[creditor.id]);
+  openTx(null, {type:'liquidacion', preset:{from: debtor.id, to: creditor.id, amount: Math.round(amount*100)/100}});
 }
 
 /* ---------- Cuentas ---------- */
@@ -762,6 +1678,7 @@ function swatchesHTML(sel){ return `<div class="swatches">${PALETTE.map(c => `<b
 function openAccount(id){
   const a = id ? {...acc(id)} : {name:'', type:'banco', initial:0, color:PALETTE[state.accounts.length % PALETTE.length]};
   const used = id ? state.tx.filter(t => t.accountId === id || t.toAccountId === id).length : 0;
+  const usedRules = id ? state.recurring.filter(r => r.accountId === id || r.toAccountId === id).length : 0;
   openSheet(`
     <h2>${id ? 'Editar cuenta' : 'Nueva cuenta'}</h2>
     ${id ? `<p class="note" style="margin:-4px 0 6px">Saldo actual: <b class="num">${money(balanceOf(id))}</b></p>` : ''}
@@ -788,6 +1705,7 @@ function openAccount(id){
       const del = e.target.closest('#a-del');
       if (del){
         if (used){ sheet.querySelector('#a-err').textContent = `Tiene ${used} movimientos. Elimínalos o muévelos antes de borrar la cuenta.`; return; }
+        if (usedRules){ sheet.querySelector('#a-err').textContent = `La usan ${usedRules} pagos programados. Cámbialos de cuenta o elimínalos antes.`; return; }
         confirmInline(del, 'Pulsa otra vez para eliminar', () => { state.accounts = state.accounts.filter(x => x.id !== id); closeSheet(); commit(); toast('Cuenta eliminada'); });
       }
     });
@@ -797,14 +1715,14 @@ function openAccount(id){
 /* ---------- Categorías ---------- */
 function openCategory(id, kind){
   const c = id ? {...cat(id)} : {name:'', kind: kind || 'gasto', color: PALETTE[state.categories.filter(x => x.kind === (kind||'gasto')).length % PALETTE.length], budget:0};
-  const used = id ? state.tx.filter(t => t.categoryId === id).length : 0;
+  const used = id ? state.tx.filter(t => t.categoryId === id).length + state.recurring.filter(r => r.categoryId === id).length : 0;
   const others = state.categories.filter(x => x.kind === c.kind && x.id !== id);
   openSheet(`
     <h2>${id ? 'Editar categoría' : 'Nueva categoría'}</h2>
     <label class="flabel" for="c-name">Nombre</label><input class="field" id="c-name" value="${esc(c.name)}" placeholder="Ej.: Gimnasio" maxlength="24">
     ${c.kind === 'gasto' ? `<label class="flabel" for="c-budget">Límite mensual (opcional)</label><input class="field num" id="c-budget" inputmode="decimal" placeholder="Sin límite" value="${c.budget ? String(c.budget).replace('.',',') : ''}">` : ''}
     <span class="flabel">Color</span>${swatchesHTML(c.color)}
-    ${id && used ? `<label class="flabel" for="c-move">Si la eliminas, sus ${used} movimientos pasan a</label><select class="field" id="c-move">${others.map(o => `<option value="${o.id}">${esc(o.name)}</option>`).join('')}</select>` : ''}
+    ${id && used ? `<label class="flabel" for="c-move">Si la eliminas, sus ${used} movimientos y pagos programados pasan a</label><select class="field" id="c-move">${others.map(o => `<option value="${o.id}">${esc(o.name)}</option>`).join('')}</select>` : ''}
     <div class="err" id="c-err"></div>
     <div class="actions"><button class="btn primary" id="c-save">Guardar categoría</button>
     ${id ? `<button class="btn danger" id="c-del">Eliminar categoría</button>` : ''}</div>`, sheet => {
@@ -823,7 +1741,7 @@ function openCategory(id, kind){
       if (del){
         if (used && !others.length){ sheet.querySelector('#c-err').textContent = 'Es la única categoría de este tipo y tiene movimientos. Crea otra antes de borrarla.'; return; }
         confirmInline(del, 'Pulsa otra vez para eliminar', () => {
-          if (used){ const to = sheet.querySelector('#c-move').value; state.tx.forEach(t => { if (t.categoryId === id) t.categoryId = to; }); }
+          if (used){ const to = sheet.querySelector('#c-move').value; state.tx.forEach(t => { if (t.categoryId === id) t.categoryId = to; }); state.recurring.forEach(r => { if (r.categoryId === id) r.categoryId = to; }); }
           state.categories = state.categories.filter(x => x.id !== id); closeSheet(); commit(); toast('Categoría eliminada');
         });
       }
@@ -860,7 +1778,7 @@ function startFresh(){
     <div class="actions"><button class="btn primary" id="s-go">Borrar ejemplo y empezar</button><button class="btn ghost" id="s-no">Seguir probando</button></div>`, sheet => {
     sheet.querySelector('#s-go').onclick = () => {
       state = {version:1, demo:false, accounts:[{id:uid(), name:'Banco', type:'banco', initial:0, color:PALETTE[0]},{id:uid(), name:'Efectivo', type:'efectivo', initial:0, color:PALETTE[2]}],
-        categories: state.categories.map(c => ({...c, budget:0})), tx:[]};
+        categories: state.categories.map(c => ({...c, budget:0})), tx:[], recurring:[]};
       closeSheet(); save(); go('inicio'); toast('Listo. Pon el saldo de cada cuenta');
     };
     sheet.querySelector('#s-no').onclick = closeSheet;
@@ -889,7 +1807,7 @@ function restore(){
       try {
         const d = JSON.parse(sheet.querySelector('#rs').value);
         if (!Array.isArray(d.accounts) || !Array.isArray(d.categories) || !Array.isArray(d.tx)) throw 0;
-        confirmInline(e.currentTarget, 'Pulsa otra vez: se sustituirán tus datos', () => { state = d; closeSheet(); save(); go('inicio'); toast('Datos restaurados'); });
+        confirmInline(e.currentTarget, 'Pulsa otra vez: se sustituirán tus datos', () => { state = normalize(d); runRecurring(state); closeSheet(); save(); go('inicio'); toast('Datos restaurados'); });
       } catch(_){ sheet.querySelector('#rs-err').textContent = 'Ese texto no es una copia válida. Copia el texto completo, desde { hasta }.'; }
     };
   });
@@ -899,30 +1817,56 @@ function resetAll(){
   openSheet(`<h2>Borrar todo</h2><p class="note">Se eliminan todas las cuentas, categorías y movimientos de este dispositivo. No se puede deshacer.</p>
     <div class="actions"><button class="btn danger" id="r-go">Borrar todos los datos</button><button class="btn ghost" id="r-demo">Volver a los datos de ejemplo</button></div>`, sheet => {
     sheet.querySelector('#r-go').onclick = e => confirmInline(e.currentTarget, 'Pulsa otra vez para borrar', () => {
-      state = {version:1, demo:false, accounts:[{id:uid(), name:'Efectivo', type:'efectivo', initial:0, color:PALETTE[2]}], categories: sampleData().categories.map(c => ({...c, budget:0})), tx:[]};
+      state = {version:1, demo:false, accounts:[{id:uid(), name:'Efectivo', type:'efectivo', initial:0, color:PALETTE[2]}], categories: sampleData().categories.map(c => ({...c, budget:0})), tx:[], recurring:[]};
       closeSheet(); save(); go('inicio'); toast('Datos borrados');
     });
     sheet.querySelector('#r-demo').onclick = () => { state = sampleData(); closeSheet(); save(); go('inicio'); };
   });
 }
 
-/* ---------- Eventos ---------- */
+/* ---------- Arranque ---------- */
+let started = false;
+function startApp(){
+  if (CLOUD){ for (const sp of [spaces.personal, spaces.house]) if (sp?.data && runRecurring(sp.data)) queueSave(sp); }
+  else if (runRecurring(state)) save();
+  render();
+  if (started) return;
+  started = true;
+  attachEvents();
+}
+
+function attachEvents(){
 document.getElementById('fab').addEventListener('click', () => openTx());
 document.getElementById('tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) go(b.dataset.tab); });
 appEl.addEventListener('click', e => {
-  const el = e.target.closest('[data-edit],[data-account],[data-cat],[data-budget],[data-goto],[data-month],[data-ftype],[data-facc],[data-action]');
+  const el = e.target.closest('[data-edit],[data-account],[data-cat],[data-budget],[data-rule],[data-space],[data-share],[data-goto],[data-month],[data-ftype],[data-facc],[data-action]');
   if (!el) return;
   const d = el.dataset;
   if (d.edit) return openTx(state.tx.find(t => t.id === d.edit));
   if (d.account) return openAccount(d.account);
   if (d.cat) return openCategory(d.cat);
   if (d.budget) return openBudget(d.budget);
+  if (d.rule){ const r = state.recurring.find(x => x.id === d.rule); if (r) openTx(null, {rule: r}); return; }
+  if (d.space) return switchSpace(d.space);
+  if (d.share){ const v = Number(d.share); const other = members().find(m => m.id !== meId);
+    state.settings = {...(state.settings || {}), shares: {[meId]: v, [other.id]: 100 - v}}; commit(); toast('Reparto guardado'); return; }
   if (d.goto){ if (d.goto !== 'inicio') ui.month = monthOf(today()); return go(d.goto); }
   if (d.month){ ui.month = shiftMonth(ui.month, Number(d.month)); return render(); }
   if (d.ftype){ ui.filterType = d.ftype; return render(); }
   if (d.facc){ ui.filterAccount = d.facc; return render(); }
-  const actions = {'new-account': () => openAccount(), 'new-cat': () => openCategory(null, d.kind), 'start-fresh': startFresh, backup, restore, reset: resetAll};
+  const actions = {'new-account': () => openAccount(), 'new-cat': () => openCategory(null, d.kind), 'start-fresh': startFresh, backup, restore, reset: resetAll, signout: signOut, 'new-rule': () => openTx(null, {freq:'monthly'}),
+    'house-create': () => createHouse(el), 'house-join': () => joinHouse(el), 'copy-code': () => copyCode(el), 'new-code': newCode,
+    'rename-me': renameMe, 'leave-house': () => leaveHouse(el), settle: openSettle,
+    'new-contribution': () => openTx(null, {type:'aportacion'})};
   actions[d.action]?.();
+});
+appEl.addEventListener('click', async e => {
+  const t = e.target.closest('#push-toggle');
+  if (!t) return;
+  t.setAttribute('aria-pressed', String(pushState !== 'on'));
+  if (pushState === 'on'){ await disablePush(); pushState = 'off'; toast('Notificaciones desactivadas'); }
+  else { const ok = await enablePush(); pushState = ok ? 'on' : await pushSubscriptionState(); toast(ok ? 'Notificaciones activadas' : 'No se pudo activar'); }
+  render();
 });
 
 /* Tooltip de los gráficos (ratón y dedo) */
@@ -938,8 +1882,127 @@ appEl.addEventListener('pointermove', showTip);
 appEl.addEventListener('pointerdown', showTip);
 appEl.addEventListener('pointerleave', () => tip.hidden = true);
 window.addEventListener('scroll', () => tip.hidden = true, {passive:true});
+// Si la app se queda abierta en segundo plano y vuelves otro día
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') { if (CLOUD) for (const sp of [spaces.personal, spaces.house]) if (sp?.dirty) flush(sp); return; }
+  if (CLOUD){
+    if (cloudStatus !== 'ready') return;
+    for (const sp of [spaces.personal, spaces.house]) if (sp?.data){ if (runRecurring(sp.data)) queueSave(sp); if (sp.dirty) flush(sp); else refreshSpace(sp); }
+    loadMembers();
+    render(); return;
+  }
+  const n = runRecurring(state); if (n){ commit(); toast(n === 1 ? 'Se ha apuntado 1 pago programado' : `Se han apuntado ${n} pagos programados`); }
+});
+window.addEventListener('online', () => { if (CLOUD) for (const sp of [spaces.personal, spaces.house]) if (sp?.dirty) flush(sp); });
+}
 
-render();
+/* ---------- Acceso (solo en modo nube) ---------- */
+function renderAuthGate(){
+  document.querySelector('.tabbar').hidden = true;
+  document.getElementById('fab').hidden = true;
+  const wrap = inner => { appEl.innerHTML = `<div class="authwrap"><div class="authcard">${inner}</div></div>`; };
+  if (cloudStatus === 'loading'){ wrap(`<div class="spin"></div><p class="note" style="text-align:center">Cargando tus datos…</p>`); return; }
+  if (cloudStatus === 'error'){
+    wrap(`<h1 class="view-title" style="font-size:21px">No se pudo conectar</h1><p class="note">Revisa tu conexión e inténtalo de nuevo.</p><div class="actions"><button class="btn primary" id="au-retry">Reintentar</button></div>`);
+    document.getElementById('au-retry').onclick = () => location.reload();
+    return;
+  }
+  const brand = `<div class="brand" style="justify-content:center;margin-bottom:10px"><span class="brand-mark">€</span>Cuentas Claras</div>`;
+  const forms = {
+    login: `${brand}<h1 class="auth-h">Entra en tu cuenta</h1>
+      <label class="flabel" for="au-email">Correo</label><input class="field" id="au-email" type="email" autocomplete="email" inputmode="email" placeholder="tu@correo.com">
+      <label class="flabel" for="au-pass">Contraseña</label><input class="field" id="au-pass" type="password" autocomplete="current-password">
+      <div class="err" id="au-err"></div>
+      <div class="actions" style="margin-top:8px"><button class="btn primary" id="au-go">Entrar</button></div>
+      <div class="auth-links"><button class="link" data-auth="signup">Crear una cuenta</button><button class="link" data-auth="forgot">He olvidado la contraseña</button></div>`,
+    signup: `${brand}<h1 class="auth-h">Crea tu cuenta</h1>
+      <label class="flabel" for="au-name">Tu nombre</label><input class="field" id="au-name" autocomplete="given-name" maxlength="20" placeholder="Así te verá tu pareja">
+      <label class="flabel" for="au-email">Correo</label><input class="field" id="au-email" type="email" autocomplete="email" inputmode="email" placeholder="tu@correo.com">
+      <label class="flabel" for="au-pass">Contraseña</label><input class="field" id="au-pass" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres">
+      <div class="err" id="au-err"></div>
+      <div class="actions" style="margin-top:8px"><button class="btn primary" id="au-go">Crear cuenta</button></div>
+      <div class="auth-links"><button class="link" data-auth="login">Ya tengo cuenta</button></div>`,
+    forgot: `${brand}<h1 class="auth-h">Recuperar contraseña</h1>
+      <p class="note" style="text-align:center">Te mandamos un correo con un enlace para poner una contraseña nueva.</p>
+      <label class="flabel" for="au-email">Correo</label><input class="field" id="au-email" type="email" autocomplete="email" inputmode="email" placeholder="tu@correo.com">
+      <div class="err" id="au-err"></div>
+      <div class="actions" style="margin-top:8px"><button class="btn primary" id="au-go">Enviar correo</button></div>
+      <div class="auth-links"><button class="link" data-auth="login">Volver</button></div>`,
+    recovery: `${brand}<h1 class="auth-h">Nueva contraseña</h1>
+      <label class="flabel" for="au-pass">Contraseña nueva</label><input class="field" id="au-pass" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres">
+      <div class="err" id="au-err"></div>
+      <div class="actions" style="margin-top:8px"><button class="btn primary" id="au-go">Guardar contraseña</button></div>`,
+    sent: `${brand}<h1 class="auth-h">Revisa tu correo</h1>
+      <p class="note" style="text-align:center" id="au-msg"></p>
+      <div class="auth-links"><button class="link" data-auth="login">Ir a entrar</button></div>`,
+  };
+  wrap(forms[authMode] || forms.login);
+  if (authMode === 'sent'){ document.getElementById('au-msg').textContent = authSentMsg; }
+  appEl.querySelectorAll('[data-auth]').forEach(b => b.onclick = () => { authMode = b.dataset.auth; renderAuthGate(); });
+  const btn = document.getElementById('au-go'); if (!btn) return;
+  const val = id => document.getElementById(id)?.value.trim() ?? '';
+  const fail = msg => { document.getElementById('au-err').textContent = msg; btn.disabled = false; btn.textContent = label; };
+  const label = btn.textContent;
+  const run = async () => {
+    const email = val('au-email'), pass = document.getElementById('au-pass')?.value ?? '';
+    if (authMode !== 'recovery' && !/^\S+@\S+\.\S+$/.test(email)) return fail('Escribe un correo válido.');
+    if ((authMode === 'signup' || authMode === 'recovery') && pass.length < 8) return fail('La contraseña necesita al menos 8 caracteres.');
+    if (authMode === 'signup' && !val('au-name')) return fail('Escribe tu nombre.');
+    btn.disabled = true; btn.textContent = 'Un momento…';
+    if (authMode === 'login'){
+      const {error} = await cloud.auth.signInWithPassword({email, password: pass});
+      if (error) return fail(/confirm/i.test(error.message) ? 'Aún no has confirmado tu correo. Busca el mensaje de confirmación (mira también en spam).' : 'Correo o contraseña incorrectos.');
+    } else if (authMode === 'signup'){
+      const {data, error} = await cloud.auth.signUp({email, password: pass, options: {data: {name: val('au-name')}, emailRedirectTo: appUrl()}});
+      if (error) return fail(/registered|exists/i.test(error.message) ? 'Ya hay una cuenta con ese correo. Entra con tu contraseña.' : 'No se pudo crear la cuenta. Inténtalo de nuevo.');
+      if (!data.session){ authSentMsg = `Te hemos mandado un correo a ${email}. Toca el enlace para confirmar la cuenta y luego vuelve aquí para entrar.`; authMode = 'sent'; renderAuthGate(); }
+    } else if (authMode === 'forgot'){
+      const {error} = await cloud.auth.resetPasswordForEmail(email, {redirectTo: appUrl()});
+      if (error) return fail('No se pudo enviar el correo. Inténtalo en unos minutos.');
+      authSentMsg = `Si hay una cuenta con ${email}, te llegará un correo con un enlace. Ábrelo y pon tu contraseña nueva; después entra desde la app.`;
+      authMode = 'sent'; renderAuthGate();
+    } else if (authMode === 'recovery'){
+      const {error} = await cloud.auth.updateUser({password: pass});
+      if (error) return fail('No se pudo cambiar. Pide otro correo de recuperación.');
+      authMode = 'login'; toast('Contraseña cambiada');
+      if (cloudUser){ meId = null; bootCloud(); }
+    }
+  };
+  btn.onclick = run;
+  appEl.querySelectorAll('input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') run(); }));
+}
+let authSentMsg = '';
+const appUrl = () => location.origin + location.pathname;
+
+/* ---------- Notificaciones push ---------- */
+function urlBase64ToUint8Array(b64){
+  const pad = '='.repeat((4 - b64.length % 4) % 4);
+  const base64 = (b64 + pad).replace(/-/g,'+').replace(/_/g,'/');
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+async function pushSubscriptionState(){
+  if (!CLOUD || !('serviceWorker' in navigator) || !('PushManager' in window)) return 'unsupported';
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  return sub ? 'on' : (Notification.permission === 'denied' ? 'denied' : 'off');
+}
+async function enablePush(){
+  const reg = await navigator.serviceWorker.ready;
+  const perm = await Notification.requestPermission();
+  if (perm !== 'granted') return false;
+  const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(CONFIG.VAPID_PUBLIC_KEY) });
+  await cloud.from('push_subscriptions').upsert({ user_id: cloudUser.id, endpoint: sub.endpoint, subscription: sub.toJSON() }, { onConflict: 'endpoint' });
+  return true;
+}
+async function disablePush(){
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  if (sub){ await cloud.from('push_subscriptions').delete().eq('endpoint', sub.endpoint); await sub.unsubscribe(); }
+}
+
+/* ---------- Arrancar ---------- */
+if (CLOUD) initCloud(); else startApp();
 </script>
 
 <script>

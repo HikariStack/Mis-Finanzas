@@ -1,6 +1,6 @@
 // Service worker: guarda la app para que abra sin conexión y muestra
 // las notificaciones push que manda el servidor.
-const CACHE = 'cuentas-claras-v4';
+const CACHE = 'cuentas-claras-v5';
 const FILES = ['./', './index.html', './config.js', './manifest.webmanifest', './apple-touch-icon.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
